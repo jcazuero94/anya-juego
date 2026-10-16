@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e8">
+  <meta name="description" content="Una aventura de cumpleaños para Anya. Resuelve pequeños retos junto a Pandora y rompe el disparatado hechizo que hace crecer a Alessandro.">
+  <meta name="color-scheme" content="light">
+  <title>Anya y el hechizo estirón · ¡Felices 8!</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preload" as="font" href="assets/fonts/nunito-variable.ttf" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="game.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar a la aventura</a>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="wordmark" href="#" id="home-link" aria-label="Anya, volver al inicio"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 3.4 8.6 9.2 1.2-7 6 2 9.2-7.6-4.9L8.4 28l2-9.2-7-6 9.2-1.2Z" fill="currentColor"/></svg><span>El mundo de Anya<span class="wordmark-dot">.</span></span></a>
+      <div class="top-actions"><span class="birthday-tag">EDICIÓN CUMPLEAÑOS <b>8</b></span><button class="icon-button" id="sound-button" aria-label="Activar sonido" aria-pressed="false" title="Activar sonido"></button><button class="help-button" id="help-button" aria-label="Cómo jugar"><span aria-hidden="true">?</span><span class="help-label">Cómo jugar</span></button></div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="footer"><span>Una aventura pequeña. Un cumpleaños enorme.</span><span class="footer-dedication">Hecho con cariño, para Anya <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20S2 14 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 7-10 13-10 13Z" fill="currentColor"/></svg></span></footer>
+  </div>
+  <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close icon-button" data-close-dialog aria-label="Cerrar ayuda">×</button><span class="eyebrow">TU PEQUEÑA GUÍA</span><h2 id="help-title">Un hechizo, seis retos<br>y un gran equipo.</h2><ol class="help-list"><li><b>Explora con calma.</b> Toca una respuesta o usa Tab y Enter. No hay reloj.</li><li><b>Reúne seis ingredientes.</b> Cuenta, descubre patrones, encuentra parejas y recuerda la receta.</li><li><b>Vigila el estirón.</b> Con cada error, Alessandro crece un poquito. Con cinco, la magia gana esa partida.</li><li><b>Pandora te ayuda.</b> Usa su pista en cada reto. Puedes pausar cuando quieras.</li></ol><p class="quiet-note">Solo el hechizo debe parar. En la vida real, crecer está bien y cada persona lo hace a su ritmo.</p><button class="button primary" data-close-dialog>¡Entendido! <span aria-hidden="true">↗</span></button></dialog>
+  <dialog id="pause-dialog" aria-labelledby="pause-title"><span class="eyebrow">UN RESPIRO EN EL JARDÍN</span><h2 id="pause-title">La aventura te espera.</h2><p>Estira los brazos, mira algo que esté lejos y vuelve cuando quieras.</p><div class="dialog-actions"><button class="button primary" id="resume-button">Seguir jugando <span aria-hidden="true">→</span></button><button class="text-button" id="quit-button">Volver al inicio</button></div></dialog>
+</body>
+</html>
