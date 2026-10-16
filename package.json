@@ -1,11 +1,12 @@
 {
   "name": "anya-y-el-hechizo-estiron",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "description": "Una aventura de cumpleaños para Anya, sin backend.",
   "scripts": {
     "start": "node scripts/serve.mjs",
+    "start:qa": "node scripts/serve.mjs --qa",
     "test": "node --test tests/logic.test.mjs",
     "check": "node scripts/check.mjs"
   },

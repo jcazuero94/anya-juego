@@ -1,5 +1,5 @@
-import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedIngredients, isUnlocked, rng } from './logic.js?v=2';
-import { PARTY, CAULDRON, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=2';
+import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3';
+import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3';
 
 const TAU=Math.PI*2;
 function ellipse(ctx,x,y,rx,ry,fill) { ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=fill;ctx.fill(); }
@@ -13,7 +13,7 @@ export class Garden {
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.getState=getState;this.callbacks=callbacks;
     this.reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;this.player=safePosition(getState().position,getState().growth);this.dog={x:this.player.x-48,y:this.player.y+30};
     this.camera={...this.player};this.path=[];this.dogPath=[];this.keys=new Set();this.walk=0;this.facing=1;this.zoom=1;this.revealed=new Set();this.history=[];this.last=0;this.uiTime=0;this.saveTime=0;this.target=null;this.dogTarget=null;
-    this.images={};for(const name of ['anya','pandora','alessandro']){const img=new Image();img.src=`assets/characters/${name}.webp`;this.images[name]=img;}
+    this.images={};for(const name of ['anya','pandora','alessandro','alyssia']){const img=new Image();img.src=`assets/characters/${name}.webp`;this.images[name]=img;}
     this.ground=this.paintGround();
     this.keydown=e=>{
       if(this.paused()||e.ctrlKey||e.metaKey||e.altKey)return;
@@ -37,7 +37,7 @@ export class Garden {
   sync(){this.player=safePosition(this.player,this.getState().growth);this.dog=safePosition(this.dog,this.getState().growth);this.path=[];this.dogPath=[];}
   nudge(direction){const [dx,dy]=({arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]})[direction];const target={x:this.player.x+dx*48,y:this.player.y+dy*48};if(!isBlocked(target.x,target.y,this.getState().growth)){this.path=findPath(this.player,target,this.getState().growth);this.target=null;}}
   travelTo(target){
-    const growth=this.getState().growth,station=QUESTS.some(q=>q.id===target.id)||target.id==='final'||target.id==='talk';
+    const growth=this.getState().growth,station=QUESTS.some(q=>q.id===target.id)||target.id?.startsWith('station-')||target.id==='final'||target.id==='talk';
     const approach=station?[[70,25],[-70,25],[0,85],[70,-25],[-70,-25],[0,-85]].map(([dx,dy])=>({x:target.x+dx,y:target.y+dy})).find(p=>!isBlocked(p.x,p.y,growth)):null;
     const route=findPath(this.player,approach||target,growth);
     if(!route.length){this.callbacks.message('Pandora busca otra ruta. Toca un claro cercano.');return false;}
@@ -45,17 +45,17 @@ export class Garden {
     const box=this.canvas.getBoundingClientRect();if(box.top<0||box.bottom>window.innerHeight)this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});return true;
   }
   tap(point){
-    const quest=QUESTS.find(q=>distance(q,point)<55);
+    const quest=ZONES.map((z,i)=>({...z,id:`station-${i}`,zone:i,title:z.name})).find(q=>distance(q,point)<65);
     if(quest){this.travelTo(quest);return;}
-    if(distance(point,CAULDRON)<55){this.travelTo({...CAULDRON,title:'la poción de Alessandro'});return;}
-    if(distance(point,PARTY)<80){this.travelTo({...PARTY,id:'talk',title:'Alessandro'});return;}
+    if(distance(point,KITCHEN)<55){this.travelTo({...KITCHEN,title:'el horno de Alyssia'});return;}
+    if(distance(point,PARTY)<80){this.travelTo({...PARTY,id:'talk',title:'Alyssia'});return;}
     if(distance(point,this.dog)<40){this.callbacks.pet();return;}
     const treasure=TREASURES.find(t=>!this.getState().treasures.includes(t.id)&&this.revealed.has(t.id)&&distance(t,point)<45);
     this.travelTo(treasure||point);
   }
   nearest(){
     const state=this.getState();
-    const items=[...QUESTS.filter(q=>!state.completed.includes(q.id)),{...CAULDRON,title:'Preparar la poción'}, {...PARTY,id:'talk',title:'Hablar con Alessandro'}];
+    const items=[...ZONES.map((z,i)=>({...z,id:`station-${i}`,zone:i,title:z.name})),{...KITCHEN,title:'Preparar el pastel'}, {...PARTY,id:'talk',title:'Hablar con Alyssia'}];
     return items.filter(item=>distance(item,this.player)<92).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]||null;
   }
   interact(){const target=this.nearest();if(target)this.callbacks.interact(target);else this.sniff();}
@@ -74,7 +74,7 @@ export class Garden {
     const dx=Number(this.keys.has('arrowright')||this.keys.has('d'))-Number(this.keys.has('arrowleft')||this.keys.has('a'));
     const dy=Number(this.keys.has('arrowdown')||this.keys.has('s'))-Number(this.keys.has('arrowup')||this.keys.has('w'));
     if(dx||dy)this.player=movePosition(this.player,dx,dy,dt,state.growth);
-    else this.advance(this.player,this.path,dt,205*(1-Math.max(0,state.growth-5)*.045));
+    else this.advance(this.player,this.path,dt,225);
     const moved=distance(before,this.player)>.1;
     if(moved){this.walk+=dt*9;if(Math.abs(this.player.x-before.x)>.1)this.facing=this.player.x>before.x?1:-1;this.history.push({...this.player});if(this.history.length>80)this.history.shift();}
     if(this.dogPath.length)this.advance(this.dog,this.dogPath,dt,220);
@@ -126,26 +126,43 @@ export class Garden {
     for(let i=0;i<3;i++){const a=time*.3+i*2;ellipse(c,330+Math.cos(a)*80,430+Math.sin(a)*45,8,3,'#dfb57899');}
     const route=this.dogTarget?[this.dog,...this.dogPath]:[this.player,...this.path];
     if(route.length>1){c.strokeStyle=this.dogTarget?'#d49b3dbb':'#6e8c6588';c.lineWidth=3;c.setLineDash([3,12]);c.lineCap='round';c.beginPath();route.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();c.setLineDash([]);}
-    for(const z of ZONES){const done=collectedIngredients(state).includes(ZONES.indexOf(z));label(c,z.name,z.x,z.y-210,{color:done?'#587c49':'#52654c'});}
+    for(const z of ZONES){const done=collectedCandles(state).includes(ZONES.indexOf(z));label(c,z.name,z.x,z.y-210,{color:done?'#587c49':'#52654c'});}
     for(const treasure of TREASURES){if(state.treasures.includes(treasure.id)||!this.revealed.has(treasure.id))continue;ellipse(c,treasure.x,treasure.y+3,20,8,'#eed19555');star(c,treasure.x,treasure.y-15+Math.sin(time*2)*4,13,'#f6d77a');if(this.dogTarget?.id===treasure.id)label(c,'Le huele a tesoro…',treasure.x,treasure.y-48,{small:true});}
     const objects=TREES.map(tree=>({y:tree.y,draw:()=>this.drawTree(c,tree,time)}));
-    objects.push({y:PARTY.y,draw:()=>{ellipse(c,PARTY.x,PARTY.y,43+state.growth*10,16+state.growth*2,'#40533b1a');this.drawAvatar(c,'alessandro',PARTY,158+state.growth*19,time);if(state.growth>=6){ellipse(c,PARTY.x+25,PARTY.y-(158+state.growth*19)*.72,43,12,'#f9f6dfcc');}label(c,'Alessandro',PARTY.x,PARTY.y+25,{small:true});}});
+    objects.push({y:HOUSE.y,draw:()=>this.drawHouse(c,state,time)});
+    objects.push({y:PARTY.y,draw:()=>{this.drawAvatar(c,'alyssia',PARTY,127,time);label(c,'Alyssia · tu guía',PARTY.x,PARTY.y+26,{small:true});}});
     objects.push({y:this.player.y,draw:()=>{this.drawAvatar(c,'anya',this.player,102,time,this.keys.size>0||this.path.length>0,this.facing);label(c,'Anya',this.player.x,this.player.y+20,{small:true});}});
     objects.push({y:this.dog.y,draw:()=>{this.drawAvatar(c,'pandora',this.dog,52,time,this.dogPath.length>0||distance(this.dog,this.player)>60,this.player.x>this.dog.x?1:-1);if(state.treasures.length===8)star(c,this.dog.x,this.dog.y-59,7,'#f5cf65');}});
-    for(const quest of QUESTS){const done=state.completed.includes(quest.id),unlocked=isUnlocked(state,quest.zone),near=distance(quest,this.player)<100;ellipse(c,quest.x,quest.y+5,24,9,done?'#70995d33':'#927a4a33');
-      if(this.target?.id===quest.id){c.strokeStyle='#fff8d6';c.lineWidth=3;c.beginPath();c.ellipse(quest.x,quest.y,35+Math.sin(time*3)*3,22,0,0,TAU);c.stroke();}
-      rounded(c,quest.x-18,quest.y-39+(done?0:Math.sin(time*2+quest.x)*2),36,36,11,done?'#749562':unlocked?'#fffae8':'#d0d1bc');
-      c.textAlign='center';c.textBaseline='middle';c.font='900 19px Nunito, sans-serif';c.fillStyle=done?'#fff5d8':unlocked?'#b48840':'#84907b';c.fillText(done?'✓':unlocked?'?':'◇',quest.x,quest.y-20);
-      if(near||this.target?.id===quest.id)label(c,quest.title,quest.x,quest.y-(near?105:65),{small:true,color:unlocked?'#365643':'#7e816d'});
-      if(done){for(let i=0;i<3;i++)flower(c,quest.x-22+i*20,quest.y+15,5,['#e7baae','#f4d594','#d7c4cf'][i]);}
+    for(let i=0;i<ZONES.length;i++){
+      const quest=ZONES[i],progress=stationProgress(state,i),done=progress===3,near=distance(quest,this.player)<100;
+      ellipse(c,quest.x,quest.y+5,31,11,'#927a4a33');
+      if(this.target?.zone===i){c.strokeStyle='#fff8d6';c.lineWidth=3;c.beginPath();c.ellipse(quest.x,quest.y,40+Math.sin(time*3)*3,27,0,0,TAU);c.stroke();}
+      rounded(c,quest.x-25,quest.y-59,50,51,13,done?'#749562':'#fff8e3');
+      c.textAlign='center';c.textBaseline='middle';c.font='900 22px Nunito, sans-serif';c.fillStyle=done?'#fff5d8':'#ac7b37';c.fillText(done?'✓':String(i+1),quest.x,quest.y-34);
+      for(let level=0;level<3;level++)ellipse(c,quest.x-14+level*14,quest.y+4,4,4,progress>level?'#638954':'#f8f1dd');
+      if(near||this.target?.zone===i)label(c,progress===0?'Nivel 1 · una vela':progress===1?'Nivel 2 · ingrediente':progress===2?'Nivel 3 · regalo':'¡Los tres premios!',quest.x,quest.y-112,{small:true});
     }
     objects.sort((a,b)=>a.y-b.y).forEach(object=>object.draw());
-    rounded(c,CAULDRON.x-23,CAULDRON.y-32,46,36,15,'#597b67');ellipse(c,CAULDRON.x,CAULDRON.y-30,24,9,'#d7dcaa');ellipse(c,CAULDRON.x,CAULDRON.y-31,18,6,collectedIngredients(state).length===6?'#e8c362':'#a6bd91');for(let i=0;i<3;i++)ellipse(c,CAULDRON.x+Math.sin(time+i)*10,CAULDRON.y-40-((time*12+i*14)%34),3,3,'#fbf5cc88');
-    if(distance(CAULDRON,this.player)<150||collectedIngredients(state).length===6)label(c,collectedIngredients(state).length===6?'¡La poción te espera!':'El taller de la poción',CAULDRON.x,CAULDRON.y-85,{small:true});
+    rounded(c,KITCHEN.x-30,KITCHEN.y-45,60,49,9,'#c28c63');rounded(c,KITCHEN.x-23,KITCHEN.y-27,46,25,6,'#685e49');ellipse(c,KITCHEN.x,KITCHEN.y-13,13,7,'#efb452');
+    if(canFinish(state))for(let i=0;i<3;i++)star(c,KITCHEN.x+Math.sin(time+i)*28,KITCHEN.y-61-i*12,5,'#edcc70');
+    if(distance(KITCHEN,this.player)<170||canFinish(state))label(c,canFinish(state)?'¡A hornear tu deseo!':'El horno de Alyssia',KITCHEN.x,KITCHEN.y-90,{small:true});
     for(let i=0;i<8;i++){const x=1930+Math.sin(time*.35+i*5)*150,y=1130+Math.cos(time*.5+i*3)*90,wing=3+Math.abs(Math.sin(time*6+i))*6;ellipse(c,x-wing/2,y,wing,4,i%2?'#e8b2a7':'#f5d580');ellipse(c,x+wing/2,y,wing,4,i%2?'#e8b2a7':'#f5d580');}
     if(state.growth>=6){c.strokeStyle='#fff6d466';c.lineWidth=2;for(let i=0;i<12;i++){const x=(time*70+i*223)%2400,y=150+i*110;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+30,y-10,x+70,y);c.stroke();}}
     c.setTransform(this.dpr,0,0,this.dpr,0,0);this.drawMinimap(c,state);
   }
-  drawMinimap(c,state){const width=132,height=88,x=this.width-width-14,y=14;rounded(c,x,y,width,height,11,'#fffbeeeb');c.save();c.translate(x+8,y+7);c.scale((width-16)/2400,(height-14)/1600);for(const zone of ZONES)ellipse(c,zone.x,zone.y,185,170,zone.color);for(const q of QUESTS)ellipse(c,q.x,q.y,22,22,state.completed.includes(q.id)?'#5c8051':'#9b8248');ellipse(c,this.player.x,this.player.y,46,46,'#c46f55');c.restore();}
+  drawHouse(c,state,time){
+    const {x,y,w}=HOUSE,g=state.growth,lift=g*4,shake=g>=7&&!this.reduced?Math.sin(time*8)*1.5:0;
+    c.save();c.translate(shake,0);ellipse(c,x,y+8,155,28,'#536b4b25');
+    rounded(c,x-w/2,y-175-lift,w,184+lift,12,'#ebcf9d');rounded(c,x-w/2+20,y-151-lift,w-40,151+lift,8,'#ad9870');
+    c.save();c.beginPath();c.rect(x-w/2+22,y-150-lift,w-44,150+lift);c.clip();this.drawAvatar(c,'alessandro',{x,y:y-1},133+g*7,time);c.restore();
+    c.fillStyle='#c77d65';c.beginPath();c.moveTo(x-w/2-18,y-174-lift);c.lineTo(x,y-263-lift);c.lineTo(x+w/2+18,y-174-lift);c.closePath();c.fill();
+    c.strokeStyle='#9d6954';c.lineWidth=5;c.lineJoin='round';c.stroke();
+    rounded(c,x+w/2-42,y-238-lift,21,46,3,'#a97e60');
+    if(g>=5){c.strokeStyle='#9c785b';c.lineWidth=3;c.beginPath();c.moveTo(x-110,y-132);c.lineTo(x-97,y-108);c.lineTo(x-110,y-92);c.lineTo(x-100,y-70);c.stroke();}
+    if(g>=8){c.strokeStyle='#9c785b';c.lineWidth=3;c.beginPath();c.moveTo(x+110,y-146);c.lineTo(x+97,y-110);c.lineTo(x+111,y-80);c.lineTo(x+99,y-37);c.stroke();}
+    label(c,'Casa de Alessandro',x,y+31,{small:true});
+    if(distance(HOUSE,this.player)<330)label(c,g<5?'«¡Anya, confío en ti!»':'«¡El techo me hace cosquillas!»',x,y-290-lift,{small:true});c.restore();
+  }
+  drawMinimap(c,state){const width=132,height=88,x=this.width-width-14,y=14;rounded(c,x,y,width,height,11,'#fffbeeeb');c.save();c.translate(x+8,y+7);c.scale((width-16)/2400,(height-14)/1600);for(let i=0;i<ZONES.length;i++){const zone=ZONES[i];ellipse(c,zone.x,zone.y,155,145,zone.color);ellipse(c,zone.x,zone.y,25,25,collectedCandles(state).includes(i)?'#5c8051':'#9b8248');}rounded(c,HOUSE.x-95,HOUSE.y-100,190,125,10,'#b77861');ellipse(c,PARTY.x,PARTY.y,38,38,'#c68b65');ellipse(c,this.player.x,this.player.y,46,46,'#c46f55');c.restore();}
   destroy(){this.destroyed=true;cancelAnimationFrame(this.frame);this.observer.disconnect();window.removeEventListener('keydown',this.keydown);window.removeEventListener('keyup',this.keyup);window.removeEventListener('blur',this.blur);this.canvas.removeEventListener('pointerup',this.pointer);}
 }

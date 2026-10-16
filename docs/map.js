@@ -1,7 +1,8 @@
-import { WORLD_SIZE, SPAWN } from './logic.js?v=2';
+import { WORLD_SIZE, SPAWN } from './logic.js?v=3';
 
 export const PARTY = { x:1200, y:820 };
-export const CAULDRON = { id:'final', x:1330, y:890 };
+export const KITCHEN = { id:'final', x:1330, y:890 };
+export const HOUSE = {x:1200,y:620,w:250,h:180};
 export const TREES = [
   [90,150,1],[250,140,.8],[470,120,1],[680,100,.85],[930,100,1],[1200,80,.9],[1450,80,.85],[1780,100,1],[2070,100,.8],[2310,150,1],
   [70,970,.8],[85,1220,1],[130,1480,.9],[430,1490,.8],[990,1530,.8],[1550,1510,.9],[2070,1500,.8],[2330,1430,1],[2340,1130,.8],
@@ -17,8 +18,8 @@ export function isBlocked(x,y,growth=0,radius=16) {
   if(BEDS.some(b=>x>b.x-radius&&x<b.x+b.w+radius&&y>b.y-radius&&y<b.y+b.h+radius))return true;
   if(TREES.some(t=>Math.hypot(x-t.x,(y-t.y)*1.2)<20*t.scale+radius))return true;
   if(Math.hypot(x-1200,y-1240)<35+radius)return true;
-  const half=43+growth*10;
-  return x>PARTY.x-half-radius&&x<PARTY.x+half+radius&&y>PARTY.y-28-radius&&y<PARTY.y+15+radius;
+  if(x>HOUSE.x-HOUSE.w/2-radius&&x<HOUSE.x+HOUSE.w/2+radius&&y>HOUSE.y-80-radius&&y<HOUSE.y+20+radius)return true;
+  return x>PARTY.x-35-radius&&x<PARTY.x+35+radius&&y>PARTY.y-22-radius&&y<PARTY.y+15+radius;
 }
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const CELL=40,COLS=WORLD_SIZE.width/CELL,ROWS=WORLD_SIZE.height/CELL;
@@ -68,7 +69,7 @@ export function findPath(start,goal,growth=0) {
 }
 export function movePosition(pos,dx,dy,dt,growth=0) {
   const length=Math.hypot(dx,dy);if(!length)return {...pos};
-  const speed=205*(1-Math.max(0,growth-5)*.045),amount=speed*Math.min(dt,.04)/Math.max(1,length);
+  const speed=225,amount=speed*Math.min(dt,.04)/Math.max(1,length);
   const next={...pos};
   if(!isBlocked(next.x+dx*amount,next.y,growth))next.x+=dx*amount;
   if(!isBlocked(next.x,next.y+dy*amount,growth))next.y+=dy*amount;

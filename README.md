@@ -1,60 +1,63 @@
-# Anya y el hechizo estirón
+# Anya y el deseo de las ocho velas
 
-Una aventura de exploración creada para los ocho años de Anya. Alessandro sopló una vela mágica y pidió crecer: ahora Anya y Pandora deben recorrer el jardín y preparar una poción para que vuelva a la fiesta.
+Un juego de cumpleaños creado para los ocho años de Anya. Alessandro está atrapado en casa por un hechizo que lo hace crecer. Anya y Pandora recorren el jardín para reunir ocho velas y los ingredientes del pastel. Alyssia hornea; Anya sopla y pide el deseo que salva a su hermano.
 
-**[Entrar al jardín](https://jcazuero94.github.io/anya-juego/)**
+**[Jugar la aventura](https://jcazuero94.github.io/anya-juego/)**
 
-## Un jardín para jugar
+## La misión
 
-- Anya camina por un mundo de 2400 × 1600 con seis zonas, senderos, árboles, un estanque, un huerto, mariposas y un observatorio. Pandora la sigue, busca tesoros y recibe caricias.
-- Se puede caminar con flechas, WASD, botones en pantalla o tocando el suelo. El mapa permite elegir un reto: Anya camina hasta él rodeando obstáculos. También hay un minimapa y controles de zoom.
-- Dieciocho retos principales, distribuidos entre doce tipos: sumas, restas y grupos; patrones numéricos y visuales; parejas; observación; palabras; acertijos; cuidado; ordenar números; comparaciones; secuencias; simetría y laberintos.
-- Las palabras, cantidades, operaciones, cartas, secuencias, preguntas, dibujos y laberintos cambian con cada aventura. La misma partida mantiene sus retos al cerrar y volver a abrir el navegador.
-- Cada zona aporta un ingrediente al resolver sus tres retos. Nuevos rincones se despiertan a medida que se avanza. Hay tres actos de historia y una receta final con los seis ingredientes.
-- Ocho estrellas opcionales esconden pequeñas historias para la bitácora. Pandora puede olfatearlas; tres estrellas calman dos estirones. Explorar todos los rincones, encontrar los secretos y cuidar a Pandora aporta insignias.
+- Ocho estaciones abiertas desde el principio. Cada una tiene tres niveles consecutivos: fácil → una vela, medio → un ingrediente, difícil → un regalo.
+- Para ganar bastan **ocho velas, harina, huevos y leche**: once retos. Los otros cinco ingredientes y los ocho regalos son opcionales. Cacao, azúcar, fresas y vainilla cambian detalles del pastel.
+- Alyssia espera en el centro, indica qué falta, recomienda el próximo objetivo necesario y hornea el pastel. Anya elige su deseo y pulsa el botón para soplar las ocho velas.
+- Una introducción animada en tres escenas explica la historia antes de iniciar el reloj. La victoria reúne a los cuatro personajes; en la derrota el tejado y las paredes se abren por el estirón.
 
-## El hechizo y las pausas
+## Explorar y aprender
 
-Cada error suma un estirón. Alessandro ocupa progresivamente más espacio en el sendero central; después aparece brisa y caminar se vuelve un poco más lento. Completar una zona reduce un estirón y guarda un campamento. Al llegar a nueve se pierde esa partida, con la opción de volver al último campamento conservando las estrellas y los ingredientes de ese punto.
+Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. Pandora la sigue, recibe caricias y olfatea ocho estrellas secretas para el álbum. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom.
 
-No hay reloj ni castigo por pedir pistas. Los setos del laberinto no penalizan los intentos. El progreso se guarda automáticamente en el navegador. Hay pausas voluntarias, recordatorios después de seis retos e invitación a celebrar fuera de la pantalla. No hay anuncios, compras, cuentas, formularios ni rastreadores.
+Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, secuencias, palabras, acertijos, patrones, simetría, laberintos y decisiones de cuidado. Cada estación rota sus tres tipos entre partidas. Números, cartas, palabras, dibujos y caminos también cambian. La dificultad escala con el nivel: más parejas, secuencias y caminos más largos, palabras mayores, sumas/restas y luego grupos. Una semilla conserva los mismos retos al retomar la partida.
 
-El humor trata de un hechizo ficticio: crecer en la vida real está bien.
+## Tiempo y descansos
 
-## Ejecutar y verificar
+**Veinte minutos de juego activo. Alessandro crece cada dos minutos.** El reloj continúa en retos, mapa, ayuda, álbum y durante la preparación del pastel. Llegar a 20:00 sin soplar provoca la derrota, incluso con todos los materiales. Los errores y las pistas no añaden estirones ni descuentan tiempo adicional.
 
-Se necesita Node.js 20 o posterior, sin instalar dependencias:
+Pausar, ocultar la pestaña o salir detiene el reloj. Al volver a una pestaña oculta se pide reanudar; al volver a abrir la página se conserva el tiempo restante. La intro no consume tiempo. El progreso y el tiempo se guardan en este navegador. Otra aventura reinicia los premios y da veinte minutos con nuevos retos.
+
+No hay anuncios, compras, cuentas, formularios ni rastreadores. El humor trata de un hechizo ficticio: crecer en la vida real está bien.
+
+## Desarrollo y verificación
+
+Node.js 20 o posterior, sin instalar dependencias:
 
 ```sh
 npm start
-```
-
-Abrir `http://127.0.0.1:4173`. El servidor local solo sirve para desarrollo; GitHub Pages publica archivos estáticos, sin backend.
-
-```sh
 npm run check
 npm test
 ```
 
-Las 27 pruebas cubren variedad de retos, partidas reproducibles, progresión, victoria, derrota, campamentos, guardado dañado, estrellas, movimiento, colisiones y rutas hacia todos los objetivos con los distintos tamaños de Alessandro. La revisión de interfaz se documenta en [tests/QA.md](tests/QA.md).
+Abrir `http://127.0.0.1:4173`. El servidor es únicamente de desarrollo. GitHub Pages sirve los archivos estáticos de `/docs`, sin backend.
 
-## Archivos
+Las 33 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
 
-- `docs/game.js`: historia, interfaz, inventario, mapa, bitácora y guardado.
-- `docs/world.js`: mundo Canvas, cámara, personajes, controles y exploración.
-- `docs/map.js`: geometría, colisiones, búsqueda de rutas y movimiento.
-- `docs/logic.js`: progresión, generación de retos y validación del guardado.
-- `docs/questions.js`: banco de palabras, acertijos y decisiones de cuidado.
-- `docs/puzzles.js`: los doce tipos de retos y la receta final.
-- `docs/icons.js`: ilustraciones e iconos compartidos.
-- `docs/styles.css` y `docs/adventure.css`: diseño adaptable, controles y movimiento reducido.
+Para revisar los límites temporales sin esperar veinte minutos:
+
+```sh
+npm run start:qa
+```
+
+Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próximas al primer estirón o la derrota. Solo se sirve con `--qa`; **no existe en el sitio público**, y sustituye la partida de prueba local.
+
+## Código y recursos
+
+- `docs/game.js`: historia, interfaz, reloj, premios, Alyssia, pastel, deseo, mapa y álbum.
+- `docs/logic.js`: progresión, reloj de juego, retos reproducibles y guardado validado.
+- `docs/world.js`, `docs/map.js`: Canvas, cámara, personajes, movimiento, colisiones y rutas.
+- `docs/puzzles.js`, `docs/questions.js`: minijuegos, pistas y bancos de lectura.
+- `docs/icons.js`: dibujos de velas, ingredientes y otros iconos.
+- `docs/styles.css`, `docs/adventure.css`, `docs/birthday.css`: diseño adaptable y animaciones con movimiento reducido.
 
 ## Publicación y privacidad
 
-GitHub Pages publica `main`, carpeta `/docs`. No hay compilación, dependencias de producción ni claves secretas. Los recursos se sirven desde el mismo sitio y la aplicación no llama a servicios externos durante el juego.
+GitHub Pages publica `main`, carpeta `/docs`. No hay compilación, dependencias de producción, claves ni llamadas a servicios externos durante el juego. Los datos se guardan en el navegador; si se bloquea el almacenamiento se puede jugar sin retomar después. La versión 3 inicia una misión nueva y conserva el contador de victorias anterior.
 
-Solo el navegador guarda la semilla de la aventura, sus avances y el número de victorias. Bloquear el almacenamiento no impide jugar, aunque no permite retomar al cerrar la página. La versión anterior del juego conserva su contador de victorias.
-
-Las fotos de referencia permanecen en la carpeta local `Fotos/`, excluida de Git. Solo se publican las ilustraciones creadas para este regalo. Sus prompts están en [design/characters.md](design/characters.md).
-
-Nunito se distribuye con su [licencia SIL Open Font License](docs/assets/fonts/OFL.txt). Las ilustraciones de los personajes se crearon con ImageGen a partir de referencias suministradas para este regalo; el mundo del jardín se dibuja con código Canvas.
+Las fotos de referencia permanecen en `Fotos/`, excluida de Git. Solo se publican las cuatro ilustraciones creadas para este regalo. Los prompts están en [design/characters.md](design/characters.md). Nunito se distribuye con su [licencia SIL Open Font License](docs/assets/fonts/OFL.txt).

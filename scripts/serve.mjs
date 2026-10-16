@@ -4,13 +4,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../docs/', import.meta.url));
+const qa = process.argv.includes('--qa');
+const fixture = fileURLToPath(new URL('../tests/browser-fixture.html', import.meta.url));
 const port = Number(process.env.PORT || 4173);
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
 const server = http.createServer(async (req, res) => {
   try {
     const urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    const filename = path.resolve(root, '.' + (urlPath === '/' ? '/index.html' : urlPath));
-    if (!filename.startsWith(root)) { res.writeHead(403).end(); return; }
+    const isFixture=qa&&urlPath==='/__qa__';
+    const filename = isFixture?fixture:path.resolve(root, '.' + (urlPath === '/' ? '/index.html' : urlPath));
+    if (!isFixture&&!filename.startsWith(root)) { res.writeHead(403).end(); return; }
     if (!(await stat(filename)).isFile()) { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'Content-Type': mime[path.extname(filename)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(await readFile(filename));

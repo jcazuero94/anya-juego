@@ -1,4 +1,4 @@
-import { icon, labels } from './icons.js?v=2';
+import { icon, labels } from './icons.js?v=3';
 const esc=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const $=(s,root)=>root.querySelector(s);
 const $$=(s,root)=>[...root.querySelectorAll(s)];
@@ -6,7 +6,7 @@ const $$=(s,root)=>[...root.querySelectorAll(s)];
 export class Puzzle {
   constructor(host,data,callbacks){
     this.host=host;this.data=data;this.callbacks=callbacks;this.timers=new Set();this.locked=false;this.selected=[];this.matched=[];this.preview=false;
-    host.innerHTML=`<div class="puzzle-content"></div><div class="feedback" role="status">Sin reloj. Una idea a la vez.</div><div class="hint-panel"><img class="hint-portrait" src="assets/characters/pandora.webp" alt="Pandora"><div class="puzzle-hint"><button class="hint-button">Una pista de Pandora ${icon('paw')}</button></div></div>`;
+    host.innerHTML=`<div class="puzzle-content"></div><div class="feedback" role="status">Puedes pedir una pista. ¡Vamos, exploradora!</div><div class="hint-panel"><img class="hint-portrait" src="assets/characters/pandora.webp" alt="Pandora"><div class="puzzle-hint"><button class="hint-button">Una pista de Pandora ${icon('paw')}</button></div></div>`;
     this.area=$('.puzzle-content',host);$('.hint-button',host).addEventListener('click',()=>this.hint());this.render();
   }
   later(fn,ms){const id=setTimeout(()=>{this.timers.delete(id);if(this.host.isConnected&&!this.destroyed)fn();},ms);this.timers.add(id);}
@@ -23,14 +23,14 @@ export class Puzzle {
   choices(options,answer,{visual=false,text=false}={}){
     const row=document.createElement('div');row.className=text?'choice-list':'answer-grid';
     row.innerHTML=options.map((value,i)=>`<button class="answer-button" data-choice="${i}" ${visual?`aria-label="${labels[value]}"`:''}>${visual?icon(value):`${text?`<span class="option-dot" aria-hidden="true">${String.fromCharCode(65+i)}</span>`:''}${esc(value)}`}</button>`).join('');
-    this.area.append(row);$$('.answer-button',row).forEach(button=>button.addEventListener('click',()=>{if(this.locked)return;const correct=options[Number(button.dataset.choice)]===answer;if(correct)this.success();else{button.disabled=true;button.classList.add('wrong');this.wrong('Ese no era. El hechizo dio un estirón. ¡Otra idea!');}}));
+    this.area.append(row);$$('.answer-button',row).forEach(button=>button.addEventListener('click',()=>{if(this.locked)return;const correct=options[Number(button.dataset.choice)]===answer;if(correct)this.success();else{button.disabled=true;button.classList.add('wrong');this.wrong('Prueba otra idea o pide una pista a Pandora.');}}));
   }
   render(){
     const d=this.data;
     if(d.type==='math'){
       const op=d.operation===1?'−':d.operation===2?'×':'+';
       let picture=d.operation===2?Array.from({length:d.a},()=>`<span class="flower-group bunch">${Array(d.b).fill(icon('flower')).join('')}</span>`).join(''):`<div class="flower-group">${Array(d.a).fill(icon('flower')).join('')}</div><span class="math-sign">${op}</span><div class="flower-group">${Array(d.b).fill(icon(d.operation===1?'leaf':'flower')).join('')}</div>`;
-      this.area.innerHTML=`<div class="math-garden" role="img" aria-label="${d.a} ${d.operation===1?'menos':d.operation===2?'grupos de':'más'} ${d.b}">${picture}</div><p class="question">${d.operation===1?`Hay ${d.a} semillas y plantamos ${d.b}. ¿Cuántas quedan?`:d.operation===2?`Hay ${d.a} grupos de ${d.b} flores. ¿Cuántas flores hay en total?`:`Tenemos ${d.a} flores y encontramos ${d.b} más. ¿Cuántas hay en total?`}</p>`;
+      this.area.innerHTML=`<div class="math-garden${d.operation===2?' grouped':''}" role="img" aria-label="${d.a} ${d.operation===1?'menos':d.operation===2?'grupos de':'más'} ${d.b}">${picture}</div><p class="question">${d.operation===1?`Hay ${d.a} semillas y plantamos ${d.b}. ¿Cuántas quedan?`:d.operation===2?`Hay ${d.a} grupos de ${d.b} flores. ¿Cuántas flores hay en total?`:`Tenemos ${d.a} flores y encontramos ${d.b} más. ¿Cuántas hay en total?`}</p>`;
       this.choices(d.options,d.answer);return;
     }
     if(d.type==='pattern'){
@@ -57,12 +57,12 @@ export class Puzzle {
       $('.check-mirror',this.area).addEventListener('click',()=>{if(this.mirror.every((v,i)=>v===d.answer[i]))this.success();else this.wrong('Mira los cuadros junto al centro. Las alas deben reflejarse.');});return;
     }
     if(d.type==='maze'){
-      this.cell=0;this.moves=0;this.drawMaze();this.keydown=e=>{const dirs={ArrowUp:-d.width,ArrowDown:d.width,ArrowLeft:-1,ArrowRight:1};if(e.key in dirs&&!this.destroyed&&this.host.isConnected){e.preventDefault();this.moveMaze(dirs[e.key]);}};window.addEventListener('keydown',this.keydown);return;
+      this.cell=0;this.moves=0;this.drawMaze();this.keydown=e=>{const dirs={ArrowUp:-d.width,ArrowDown:d.width,ArrowLeft:-1,ArrowRight:1};if(e.key in dirs&&!this.destroyed&&this.host.isConnected&&!document.querySelector('#pause-dialog[open]')){e.preventDefault();this.moveMaze(dirs[e.key]);}};window.addEventListener('keydown',this.keydown);return;
     }
   }
   updateTiles(){const d=this.data,word=d.type==='word',values=word?d.letters:d.values,selection=this.selected.map(i=>values[i]);$('.word-slots',this.area).innerHTML=values.map((_,i)=>`<span class="word-slot" aria-hidden="true">${selection[i]??''}</span>`).join('');$('.word-slots',this.area).setAttribute('aria-label',selection.length?`Tu ${word?'palabra':'orden'}: ${selection.join(', ')}`:'Espacios por completar');$('.check',this.area).disabled=selection.length!==values.length;$('.erase',this.area).disabled=!selection.length;}
   drawMemory(){
-    const d=this.data;this.area.innerHTML=`<p class="memory-progress">${this.matched.length/2} de ${d.cards.length/2} parejas encontradas</p><div class="memory-grid ${d.cards.length===8?'four-columns':''}">${d.cards.map((s,i)=>{const matched=this.matched.includes(i),show=this.preview||matched||this.selected.includes(i);return `<button class="memory-card ${show?'revealed':''} ${matched?'matched':''}" data-card="${i}" aria-label="Carta ${i+1}, ${show?labels[s]:'boca abajo'}${matched?', pareja encontrada':''}" aria-pressed="${show}" ${matched?'disabled':''}>${icon(show?s:'paw',show?'':'card-back')}${matched?'<span class="matched-check">✓</span>':''}</button>`;}).join('')}</div>`;
+    const d=this.data;this.area.innerHTML=`<p class="memory-progress">${this.matched.length/2} de ${d.cards.length/2} parejas encontradas</p><div class="memory-grid ${d.cards.length>=8?'four-columns':''}">${d.cards.map((s,i)=>{const matched=this.matched.includes(i),show=this.preview||matched||this.selected.includes(i);return `<button class="memory-card ${show?'revealed':''} ${matched?'matched':''}" data-card="${i}" aria-label="Carta ${i+1}, ${show?labels[s]:'boca abajo'}${matched?', pareja encontrada':''}" aria-pressed="${show}" ${matched?'disabled':''}>${icon(show?s:'paw',show?'':'card-back')}${matched?'<span class="matched-check">✓</span>':''}</button>`;}).join('')}</div>`;
     $$('.memory-card',this.area).forEach(button=>button.addEventListener('click',()=>{const id=Number(button.dataset.card);if(this.locked||this.selected.includes(id)||this.matched.includes(id))return;this.selected.push(id);this.drawMemory();this.callbacks.sound('tap');if(this.selected.length<2)return;const [a,b]=this.selected;if(d.cards[a]===d.cards[b]){this.matched.push(a,b);this.selected=[];if(this.matched.length===d.cards.length)this.success();else{this.drawMemory();this.feedback('¡Una pareja! Guarda su lugar en tu memoria.','success');}}else this.wrong('Son diferentes. Ya sabes dónde están: ¡eso también ayuda!',()=>{this.selected=[];this.drawMemory();});}));
   }
   drawSequence(){
@@ -73,7 +73,7 @@ export class Puzzle {
     $$('.recipe-button',this.area).forEach(button=>button.addEventListener('click',()=>{if(this.locked)return;const s=button.dataset.symbol;if(s!==d.recipe[this.selected.length]){this.wrong('La secuencia se mezcló. Vamos a mirarla otra vez.',()=>{this.studying=true;this.selected=[];this.drawSequence();});return;}this.selected.push(s);this.callbacks.sound('tap');if(this.selected.length===d.recipe.length)this.success();else this.drawSequence();}));
   }
   drawMaze(){
-    const d=this.data;this.area.innerHTML=`<p class="question">Guía la semilla hasta la estrella.</p><div class="maze-grid" style="--columns:${d.width}" role="img" aria-label="Laberinto. Semilla en fila ${Math.floor(this.cell/d.width)+1}, columna ${this.cell%d.width+1}. Estrella en fila ${d.height}, columna ${d.width}.">${d.blocked.map((blocked,i)=>`<span class="maze-cell ${blocked?'hedge':''} ${this.showRoute&&d.solution.includes(i)?'route-hint':''}">${i===this.cell?icon('leaf'):i===d.blocked.length-1?icon('star'):blocked?'':i===0?'<span class="maze-start">•</span>':''}</span>`).join('')}</div><div class="maze-directions"><button data-step="${-d.width}" aria-label="Arriba">↑</button><button data-step="-1" aria-label="Izquierda">←</button><button data-step="${d.width}" aria-label="Abajo">↓</button><button data-step="1" aria-label="Derecha">→</button></div><p class="quiet-note">Flechas o botones. Chocar con un seto no aumenta el estirón.</p>`;
+    const d=this.data;this.area.innerHTML=`<p class="question">Guía la semilla hasta la estrella.</p><div class="maze-grid" style="--columns:${d.width}" role="img" aria-label="Laberinto. Semilla en fila ${Math.floor(this.cell/d.width)+1}, columna ${this.cell%d.width+1}. Estrella en fila ${d.height}, columna ${d.width}.">${d.blocked.map((blocked,i)=>`<span class="maze-cell ${blocked?'hedge':''} ${this.showRoute&&d.solution.includes(i)?'route-hint':''}">${i===this.cell?icon('leaf'):i===d.blocked.length-1?icon('star'):blocked?'':i===0?'<span class="maze-start">•</span>':''}</span>`).join('')}</div><div class="maze-directions"><button data-step="${-d.width}" aria-label="Arriba">↑</button><button data-step="-1" aria-label="Izquierda">←</button><button data-step="${d.width}" aria-label="Abajo">↓</button><button data-step="1" aria-label="Derecha">→</button></div><p class="quiet-note">Flechas o botones. Busca otra ruta si encuentras un seto.</p>`;
     $$('[data-step]',this.area).forEach(button=>button.addEventListener('click',()=>this.moveMaze(Number(button.dataset.step))));
   }
   moveMaze(step){if(this.locked)return;const d=this.data,next=this.cell+step;if(next<0||next>=d.blocked.length||(step===-1&&this.cell%d.width===0)||(step===1&&this.cell%d.width===d.width-1)||d.blocked[next]){this.feedback('Por ahí hay un seto. Prueba otro camino.');return;}this.cell=next;this.moves++;this.callbacks.sound('tap');if(next===d.blocked.length-1)this.success();else this.drawMaze();}

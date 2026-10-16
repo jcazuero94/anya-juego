@@ -1,6 +1,18 @@
 export const art = (name, extra = '') => `<img class="character ${name} ${extra}" src="assets/characters/${name}.webp" alt="" draggable="false">`;
 export const labels = { sun: 'Sol', leaf: 'Hoja', flower: 'Flor', drop: 'Gota', heart: 'Corazón', star: 'Estrella' };
 const paths = {
+  candle:'<path d="M12 14h8v15h-8z" fill="#d89583" stroke="#ac6f5c"/><path d="m12 18 8 5m-8 0 8 5" stroke="#fff0c9" stroke-width="2"/><path d="M16 2c-7 7-4 11 0 10s6-5 0-10Z" fill="#edba54"/><path d="M16 10v5" stroke="#8b6f42"/>',
+  flour:'<path d="m9 5 2 5-5 17c6 4 14 4 20 0l-5-17 2-5Z" fill="#e7d9ad" stroke="#a58a58" stroke-width="1.3"/><path d="M10 10h12" stroke="#a58a58"/><ellipse cx="16" cy="21" rx="5" ry="6" fill="#fff6da"/><path d="M16 25V16m0 5-3-2m3 0 3-2" stroke="#b79a58" stroke-width="1.3"/>',
+  eggs:'<path d="M16 4C12 4 7 14 7 20a9 9 0 0 0 18 0c0-6-5-16-9-16Z" fill="#f4e4be" stroke="#b79a73" stroke-width="1.3"/><path d="M11 19c0-4 2-8 4-10" stroke="#fff9e7" stroke-width="2" stroke-linecap="round"/>',
+  milk:'<path d="m10 3 12 0 4 7v19H6V10Z" fill="#e7eee3" stroke="#6b999c" stroke-width="1.3"/><path d="M10 3v7H6m4 0h16M6 15h20v9H6Z" fill="#96c1c4" stroke="#6b999c"/><path d="M16 16s-4 4-4 6a4 4 0 0 0 8 0c0-2-4-6-4-6Z" fill="#f9f5df"/>',
+  butter:'<path d="M3 25h26v4H3Z" fill="#e1dcc5"/><path d="m6 14 6-6 15 3v13H6Z" fill="#e9c66d" stroke="#b39848"/><path d="M6 14h21m-6-1 6-2m-6 2v11" fill="none" stroke="#b39848"/>',
+  sugar:'<path d="m8 4 16 0-2 6 5 18H5l5-18Z" fill="#e9c9ba" stroke="#ba8b7a"/><circle cx="16" cy="20" r="6" fill="#fff8e5"/><path d="m13 17 6 2v5l-6-2Z" fill="#e0dbc7"/>',
+  vanilla:'<path d="M9 28C22 21 14 11 23 4M6 26C17 18 8 10 17 4" fill="none" stroke="#88694e" stroke-width="3" stroke-linecap="round"/><path d="M12 8C0-1 2 19 12 8c-8 10 12 13 0 0 13 7 12-11 0 0Z" fill="#f1dfb5" stroke="#bba46c"/><circle cx="12" cy="8" r="2" fill="#d1a24f"/>',
+  cacao:'<path d="m7 9 19-5 4 20-19 5Z" fill="#a47b5c" stroke="#755941"/><path d="m13 8 4 19m2-21 4 19M8 16l19-5M9 22l19-5" stroke="#755941"/>',
+  berries:'<path d="M6 11c0 7 6 18 10 18s10-11 10-18Z" fill="#d38d7e" stroke="#b66d5d"/><path d="m5 8 7-1 4-5 3 5 8 1-7 5-4-3-5 3Z" fill="#87a36c"/><path d="M12 17v2m8-2v2m-4 2v2" stroke="#f6d58b" stroke-width="2" stroke-linecap="round"/>',
+  gift:'<path d="M6 14h20v15H6Zm-2-5h24v6H4Z" fill="#d69a85" stroke="#aa715d"/><path d="M14 9h4v20h-4Z" fill="#ecd18c"/><path d="M16 9C3 9 7-1 12 3l4 6c11 1 11-11 5-7Z" fill="#ecd18c" stroke="#b79b58"/>',
+  cake:'<path d="M5 17h22v12H5Z" fill="#d7aa7d" stroke="#a68059"/><path d="M5 17c2-6 20-6 22 0v5c-3 3-4-2-7 0s-4 2-7 0-5 2-8 0Z" fill="#f4d9c4"/><path d="M15 5h3v9h-3Z" fill="#d28b7a"/><path d="M17 1c-5 4-3 6 0 5s3-3 0-5Z" fill="#e5b34d"/><path d="M2 30h28" stroke="#9b906d" stroke-width="2"/>',
+  music:'<path d="M13 22V6l13-3v17" fill="none" stroke="#8e8368" stroke-width="3"/><ellipse cx="8" cy="24" rx="6" ry="4" fill="#bd9280"/><ellipse cx="21" cy="22" rx="6" ry="4" fill="#bd9280"/><path d="m13 11 13-3" stroke="#8e8368" stroke-width="3"/>',
   star: '<path d="m16 3 3.7 8 8.8 1-6.5 6 1.8 9-7.8-4.5L8.2 27l1.8-9-6.5-6 8.8-1Z" fill="#e6b34e" stroke="#b68634" stroke-width="1.2"/>',
   sun: '<circle cx="16" cy="16" r="6" fill="#efc35f" stroke="#c39743" stroke-width="1.2"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6 6l3 3m14 14 3 3M6 26l3-3M23 9l3-3" stroke="#d7a447" stroke-width="2" stroke-linecap="round"/>',
   leaf: '<path d="M27 5C8 3 2 16 7 23c8 10 22 0 20-18Z" fill="#90aa70" stroke="#5b7d4c" stroke-width="1.3"/><path d="M4 29 23 10m-9 9-1-8m7 2 4 1" stroke="#5b7d4c" stroke-width="1.5" stroke-linecap="round"/>',

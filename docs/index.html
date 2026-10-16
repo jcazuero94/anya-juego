@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f7f3e8">
-  <meta name="description" content="Una aventura de cumpleaños para Anya. Resuelve pequeños retos junto a Pandora y rompe el disparatado hechizo que hace crecer a Alessandro.">
+  <meta name="description" content="Una aventura de cumpleaños para Anya. Encuentra ocho velas y los ingredientes del pastel con Pandora. Alyssia te ayudará a salvar a Alessandro antes de que crezca demasiado.">
   <meta name="color-scheme" content="light">
-  <title>Anya y el hechizo estirón · ¡Felices 8!</title>
+  <title>Anya y el deseo de las ocho velas · ¡Felices 8!</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preload" as="font" href="assets/fonts/nunito-variable.ttf" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=2">
-  <link rel="stylesheet" href="adventure.css?v=2">
-  <script type="module" src="game.js?v=2"></script>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="adventure.css?v=3">
+  <link rel="stylesheet" href="birthday.css?v=3">
+  <script type="module" src="game.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Saltar a la aventura</a>
@@ -24,8 +25,8 @@
     <footer class="footer"><span>Una aventura pequeña. Un cumpleaños enorme.</span><span class="footer-dedication">Hecho con cariño, para Anya <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20S2 14 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 7-10 13-10 13Z" fill="currentColor"/></svg></span></footer>
   </div>
   <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close icon-button" data-close-dialog aria-label="Cerrar ayuda">×</button><span class="eyebrow">TU GUÍA DE EXPLORADORA</span><h2 id="help-title">Un jardín entero.<br>Un gran equipo.</h2><ol class="help-list"><li><b>Muévete por el jardín.</b> Usa flechas, WASD o los botones de caminar. Toca el suelo para ir a un lugar.</li><li><b>Elige tu camino.</b> Los signos ? esconden 18 retos. En el mapa puedes elegir uno y caminar hasta él. E o espacio sirven para explorar cerca.</li><li><b>Despierta seis ingredientes.</b> Completa los tres retos de una zona para abrir nuevos rincones y calmar un estirón. Al reunir los seis, vuelve al caldero.</li><li><b>Sigue a Pandora.</b> Su botón de huella la envía a olfatear estrellas secretas. Tres estrellas calman dos estirones. Las pistas de los retos son gratis.</li><li><b>Descansa cuando quieras.</b> El progreso se guarda en este navegador. Si el hechizo llega a nueve estirones, puedes volver al último campamento.</li></ol><p class="quiet-note">No hay reloj. Solo el hechizo debe parar; en la vida real, crecer está bien.</p><button class="button primary" data-close-dialog>¡Vamos a explorar! <span aria-hidden="true">↗</span></button></dialog>
-  <dialog id="pause-dialog" aria-labelledby="pause-title"><span class="eyebrow">UN RESPIRO EN EL JARDÍN</span><h2 id="pause-title">Tu aventura está guardada.</h2><p>Estira los brazos, mira algo que esté lejos y vuelve cuando quieras. Anya y Pandora te esperan aquí.</p><div class="dialog-actions"><button class="button primary" id="resume-button">Seguir explorando <span aria-hidden="true">→</span></button><button class="text-button" id="quit-button">Guardar y volver al inicio</button></div></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close icon-button" data-close-dialog aria-label="Cerrar ayuda">×</button><span class="eyebrow">TU GUÍA DE EXPLORADORA</span><h2 id="help-title">Un jardín entero.<br>Un gran equipo.</h2><ol class="help-list"><li><b>Explora con Pandora.</b> Camina con flechas, WASD, botones o tocando el jardín. En el mapa puedes elegir una estación y Anya irá hasta allí.</li><li><b>Ocho estaciones, tres niveles.</b> En cada una ganas primero una vela, después un ingrediente y al final un regalo. Los niveles se abren en ese orden y cambian entre partidas.</li><li><b>Prepara tu deseo.</b> Necesitas las ocho velas, harina, huevos y leche. Los otros cinco ingredientes y los regalos son extras.</li><li><b>Habla con Alyssia.</b> Te espera en el centro del parque. Puede guiarte al siguiente premio necesario y hornear tu pastel. Después pide tu deseo y sopla las velas.</li><li><b>Vigila la casa.</b> Tienes 20 minutos de juego. Cada dos minutos Alessandro crece; al acabarse el tiempo rompe la casa. El reloj sigue durante los retos y las pistas, y se detiene con Pausar o al salir.</li><li><b>Aprende a tu ritmo.</b> Puedes pedir pistas y volver a intentar. Pandora también olfatea ocho estrellas secretas para tu álbum.</li></ol><p class="quiet-note">El progreso se guarda en este navegador. En la vida real, crecer está bien: este estirón es un hechizo de cuento.</p><button class="button primary" data-close-dialog>¡Vamos a explorar! <span aria-hidden="true">↗</span></button></dialog>
+  <dialog id="pause-dialog" aria-labelledby="pause-title"><span class="eyebrow">UN RESPIRO EN EL JARDÍN</span><h2 id="pause-title">Tu aventura está guardada.</h2><p>Estira los brazos, mira algo que esté lejos y vuelve cuando quieras. El reloj está detenido. Anya y Pandora te esperan aquí.</p><div class="dialog-actions"><button class="button primary" id="resume-button">Seguir explorando <span aria-hidden="true">→</span></button><button class="text-button" id="quit-button">Guardar y volver al inicio</button></div></dialog>
   <dialog id="adventure-dialog" aria-labelledby="panel-title"></dialog>
   <noscript><p>Activa JavaScript en tu navegador para explorar el jardín con Anya y Pandora.</p></noscript>
 </body>
