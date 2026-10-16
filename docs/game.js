@@ -1,5 +1,5 @@
 import { GAME_DURATION, GROWTH_INTERVAL, INGREDIENTS, ZONES, QUESTS, TREASURES, LEVEL_NAMES, GROWTH_MESSAGES, PlayClock, createGame, generateChallenges, collectedCandles, collectedIngredients, collectedGifts, stationProgress, isUnlocked, completeQuest, makeMistake, collectTreasure, advanceTime, remainingTime, formatTime, canFinish, nextRequiredQuest, bakeCake, winGame, readSave } from './logic.js?v=3';
-import { Garden } from './world.js?v=3';
+import { Garden } from './world.js?v=3.0.1';
 import { Puzzle } from './puzzles.js?v=3';
 import { PARTY, KITCHEN } from './map.js?v=3';
 import { art, icon } from './icons.js?v=3';

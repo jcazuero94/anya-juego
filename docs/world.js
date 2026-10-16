@@ -130,7 +130,7 @@ export class Garden {
     for(const treasure of TREASURES){if(state.treasures.includes(treasure.id)||!this.revealed.has(treasure.id))continue;ellipse(c,treasure.x,treasure.y+3,20,8,'#eed19555');star(c,treasure.x,treasure.y-15+Math.sin(time*2)*4,13,'#f6d77a');if(this.dogTarget?.id===treasure.id)label(c,'Le huele a tesoro…',treasure.x,treasure.y-48,{small:true});}
     const objects=TREES.map(tree=>({y:tree.y,draw:()=>this.drawTree(c,tree,time)}));
     objects.push({y:HOUSE.y,draw:()=>this.drawHouse(c,state,time)});
-    objects.push({y:PARTY.y,draw:()=>{this.drawAvatar(c,'alyssia',PARTY,127,time);label(c,'Alyssia · tu guía',PARTY.x,PARTY.y+26,{small:true});}});
+    objects.push({y:PARTY.y,draw:()=>{this.drawAvatar(c,'alyssia',PARTY,136,time);label(c,'Alyssia · tu guía',PARTY.x,PARTY.y+26,{small:true});}});
     objects.push({y:this.player.y,draw:()=>{this.drawAvatar(c,'anya',this.player,102,time,this.keys.size>0||this.path.length>0,this.facing);label(c,'Anya',this.player.x,this.player.y+20,{small:true});}});
     objects.push({y:this.dog.y,draw:()=>{this.drawAvatar(c,'pandora',this.dog,52,time,this.dogPath.length>0||distance(this.dog,this.player)>60,this.player.x>this.dog.x?1:-1);if(state.treasures.length===8)star(c,this.dog.x,this.dog.y-59,7,'#f5cf65');}});
     for(let i=0;i<ZONES.length;i++){

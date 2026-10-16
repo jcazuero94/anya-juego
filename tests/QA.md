@@ -40,3 +40,7 @@ Canvas y CSS respetan `prefers-reduced-motion`; la comprobación de esta prefere
 ## Capturas locales
 
 En `output/qa/` (fuera de Git): `anya-v3-deseo.jpg`, `anya-v3-victoria.jpg`, `anya-v3-derrota.jpg` y la captura de la versión publicada. Las fotos originales permanecen en `Fotos/`, excluidas de Git.
+
+## Ajuste de altura · versión 3.0.1
+
+Alyssia se muestra más alta que Anya en portada, jardín, introducción y celebración. Revisado en 1280 × 900, 390 × 844 y 320 × 740: alrededor de 20 % de diferencia en la portada y 22 % en la celebración, sin deformar las ilustraciones ni introducir desplazamiento horizontal. La intro conserva la figura completa y los módulos pasan la comprobación de sintaxis.
