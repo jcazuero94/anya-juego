@@ -9,8 +9,9 @@
   <title>Anya y el hechizo estirón · ¡Felices 8!</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preload" as="font" href="assets/fonts/nunito-variable.ttf" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="game.js"></script>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="adventure.css?v=2">
+  <script type="module" src="game.js?v=2"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Saltar a la aventura</a>
@@ -23,7 +24,9 @@
     <footer class="footer"><span>Una aventura pequeña. Un cumpleaños enorme.</span><span class="footer-dedication">Hecho con cariño, para Anya <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20S2 14 2 7a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 7-10 13-10 13Z" fill="currentColor"/></svg></span></footer>
   </div>
   <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close icon-button" data-close-dialog aria-label="Cerrar ayuda">×</button><span class="eyebrow">TU PEQUEÑA GUÍA</span><h2 id="help-title">Un hechizo, seis retos<br>y un gran equipo.</h2><ol class="help-list"><li><b>Explora con calma.</b> Toca una respuesta o usa Tab y Enter. No hay reloj.</li><li><b>Reúne seis ingredientes.</b> Cuenta, descubre patrones, encuentra parejas y recuerda la receta.</li><li><b>Vigila el estirón.</b> Con cada error, Alessandro crece un poquito. Con cinco, la magia gana esa partida.</li><li><b>Pandora te ayuda.</b> Usa su pista en cada reto. Puedes pausar cuando quieras.</li></ol><p class="quiet-note">Solo el hechizo debe parar. En la vida real, crecer está bien y cada persona lo hace a su ritmo.</p><button class="button primary" data-close-dialog>¡Entendido! <span aria-hidden="true">↗</span></button></dialog>
-  <dialog id="pause-dialog" aria-labelledby="pause-title"><span class="eyebrow">UN RESPIRO EN EL JARDÍN</span><h2 id="pause-title">La aventura te espera.</h2><p>Estira los brazos, mira algo que esté lejos y vuelve cuando quieras.</p><div class="dialog-actions"><button class="button primary" id="resume-button">Seguir jugando <span aria-hidden="true">→</span></button><button class="text-button" id="quit-button">Volver al inicio</button></div></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title"><button class="dialog-close icon-button" data-close-dialog aria-label="Cerrar ayuda">×</button><span class="eyebrow">TU GUÍA DE EXPLORADORA</span><h2 id="help-title">Un jardín entero.<br>Un gran equipo.</h2><ol class="help-list"><li><b>Muévete por el jardín.</b> Usa flechas, WASD o los botones de caminar. Toca el suelo para ir a un lugar.</li><li><b>Elige tu camino.</b> Los signos ? esconden 18 retos. En el mapa puedes elegir uno y caminar hasta él. E o espacio sirven para explorar cerca.</li><li><b>Despierta seis ingredientes.</b> Completa los tres retos de una zona para abrir nuevos rincones y calmar un estirón. Al reunir los seis, vuelve al caldero.</li><li><b>Sigue a Pandora.</b> Su botón de huella la envía a olfatear estrellas secretas. Tres estrellas calman dos estirones. Las pistas de los retos son gratis.</li><li><b>Descansa cuando quieras.</b> El progreso se guarda en este navegador. Si el hechizo llega a nueve estirones, puedes volver al último campamento.</li></ol><p class="quiet-note">No hay reloj. Solo el hechizo debe parar; en la vida real, crecer está bien.</p><button class="button primary" data-close-dialog>¡Vamos a explorar! <span aria-hidden="true">↗</span></button></dialog>
+  <dialog id="pause-dialog" aria-labelledby="pause-title"><span class="eyebrow">UN RESPIRO EN EL JARDÍN</span><h2 id="pause-title">Tu aventura está guardada.</h2><p>Estira los brazos, mira algo que esté lejos y vuelve cuando quieras. Anya y Pandora te esperan aquí.</p><div class="dialog-actions"><button class="button primary" id="resume-button">Seguir explorando <span aria-hidden="true">→</span></button><button class="text-button" id="quit-button">Guardar y volver al inicio</button></div></dialog>
+  <dialog id="adventure-dialog" aria-labelledby="panel-title"></dialog>
+  <noscript><p>Activa JavaScript en tu navegador para explorar el jardín con Anya y Pandora.</p></noscript>
 </body>
 </html>

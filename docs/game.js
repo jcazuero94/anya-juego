@@ -1,264 +1,118 @@
-import { MAX_GROWTH, TOTAL_CHAPTERS, INGREDIENTS, GROWTH_MESSAGES, CARE_QUESTIONS, createGame, makeMistake, finishChapter, nextChapter, makeMath, makePattern, makeMemory, checkRecipe, shuffle } from './logic.js';
+import { MAX_GROWTH, INGREDIENTS, ZONES, QUESTS, TREASURES, GROWTH_MESSAGES, createGame, generateChallenges, collectedIngredients, isUnlocked, completeQuest, makeMistake, collectTreasure, soothe, restoreCheckpoint, winGame, readSave } from './logic.js?v=2';
+import { Garden } from './world.js?v=2';
+import { Puzzle } from './puzzles.js?v=2';
+import { CAULDRON } from './map.js?v=2';
+import { art, icon } from './icons.js?v=2';
 
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const main = $('#main');
-const timers = new Set();
-let state = null;
-let challenge = null;
-let locked = false;
-let hintUsed = false;
-let soundEnabled = false;
-let audioContext;
-let lastFocus;
-let wins = readWins();
+const $=(s,root=document)=>root.querySelector(s),$$=(s,root=document)=>[...root.querySelectorAll(s)];
+const main=$('#main'),panel=$('#adventure-dialog'),SAVE_KEY='anya-garden-v2';
+let state=null,garden=null,puzzle=null,challenges=null,soundEnabled=false,audioContext=null,outcomeTimer=null,lastFocus=null;
+let saved=load(),wins=readWins();
+function load(){try{return readSave(localStorage.getItem(SAVE_KEY));}catch{return null;}}
+function readWins(){try{return Math.max(0,Math.min(999,Number(localStorage.getItem('anya-adventure-wins'))||0));}catch{return 0;}}
+function save(){if(!state)return;try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));saved=state;}catch{/* Las aventuras también funcionan sin almacenamiento. */}}
+function announce(text){$('#announcer').textContent=text;}
+function focusHeading(root=main){const heading=$('h1,h2',root);if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
+function sound(kind='tap'){
+  if(!soundEnabled||document.hidden)return;
+  try{audioContext??=new(window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});const notes=kind==='win'?[523,659,784,1047]:kind==='success'?[523,659,784]:kind==='error'?[294,262]:[587];notes.forEach((f,i)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain(),t=audioContext.currentTime+i*.1;osc.type='sine';osc.frequency.value=f;gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(.035,t+.015);gain.gain.exponentialRampToValueAtTime(.001,t+.28);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t);osc.stop(t+.3);});}catch{soundEnabled=false;updateSound();}
+}
+function updateSound(){const button=$('#sound-button');button.innerHTML=icon(soundEnabled?'sound':'mute');button.setAttribute('aria-pressed',String(soundEnabled));button.setAttribute('aria-label',soundEnabled?'Desactivar sonido':'Activar sonido');}
+function dispose(){clearTimeout(outcomeTimer);puzzle?.destroy();puzzle=null;garden?.destroy();garden=null;for(const dialog of $$('dialog[open]'))dialog.close();}
+function message(text){const el=$('#garden-message');if(el)el.textContent=text;announce(text);}
+function openPanel(html,setup){garden?.stop();lastFocus=document.activeElement;if(panel.open)panel.close();panel.innerHTML=`<button class="dialog-close icon-button" id="panel-close" aria-label="Volver al jardín">×</button>${html}`;$('#panel-close',panel).addEventListener('click',closePanel);panel.showModal();setup?.();focusHeading(panel);}
+function closePanel(){puzzle?.destroy();puzzle=null;panel.close();garden?.stop();save();if(garden)$('#garden-canvas')?.focus({preventScroll:true});else lastFocus?.focus({preventScroll:true});}
+panel.addEventListener('cancel',()=>{puzzle?.destroy();puzzle=null;garden?.stop();save();});
 
-const art = (name, extra = '') => `<img class="character ${name} ${extra}" src="assets/characters/${name}.webp" alt="" draggable="false">`;
-const labels = { sun: 'Sol', leaf: 'Hoja', flower: 'Flor', drop: 'Gota', heart: 'Corazón', star: 'Estrella' };
-const paths = {
-  star: '<path d="m16 3 3.7 8 8.8 1-6.5 6 1.8 9-7.8-4.5L8.2 27l1.8-9-6.5-6 8.8-1Z" fill="#e6b34e" stroke="#b68634" stroke-width="1.2"/>',
-  sun: '<circle cx="16" cy="16" r="6" fill="#efc35f" stroke="#c39743" stroke-width="1.2"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6 6l3 3m14 14 3 3M6 26l3-3M23 9l3-3" stroke="#d7a447" stroke-width="2" stroke-linecap="round"/>',
-  leaf: '<path d="M27 5C8 3 2 16 7 23c8 10 22 0 20-18Z" fill="#90aa70" stroke="#5b7d4c" stroke-width="1.3"/><path d="M4 29 23 10m-9 9-1-8m7 2 4 1" stroke="#5b7d4c" stroke-width="1.5" stroke-linecap="round"/>',
-  flower: '<path d="M16 21v9m0-4 7-4" stroke="#72864f" stroke-width="2" stroke-linecap="round"/><g fill="#d88b80" stroke="#b97770" stroke-width=".6"><ellipse cx="16" cy="8" rx="5" ry="6"/><ellipse cx="22" cy="13" rx="6" ry="5"/><ellipse cx="20" cy="20" rx="5" ry="6"/><ellipse cx="11" cy="20" rx="5" ry="6"/><ellipse cx="9" cy="12" rx="6" ry="5"/></g><circle cx="16" cy="14" r="4" fill="#f5d681"/>',
-  drop: '<path d="M16 3S6 15 6 21a10 10 0 0 0 20 0C26 15 16 3 16 3Z" fill="#8bbcc2" stroke="#61979f" stroke-width="1.3"/><path d="M10 21c0 3 2 5 5 6" stroke="#e1f0df" stroke-width="2" stroke-linecap="round"/>',
-  heart: '<path d="M16 28S3 20 3 11a7 7 0 0 1 13-3 7 7 0 0 1 13 3c0 9-13 17-13 17Z" fill="#d68f82" stroke="#b67467" stroke-width="1.3"/>',
-  paw: '<ellipse cx="16" cy="22" rx="8" ry="7" fill="currentColor"/><ellipse cx="6" cy="13" rx="3.5" ry="4.5" fill="currentColor"/><ellipse cx="13" cy="7" rx="3.5" ry="4.5" fill="currentColor"/><ellipse cx="22" cy="8" rx="3.5" ry="4.5" fill="currentColor"/><ellipse cx="28" cy="15" rx="3.5" ry="4.5" fill="currentColor"/>',
-  clock: '<circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 8v9l6 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-  check: '<circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10 16 4 4 8-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
-  pause: '<path d="M11 7v18M21 7v18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
-  sound: '<path d="M5 12h5l8-6v20l-8-6H5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M23 10c4 3 4 9 0 12m4-16c7 6 7 14 0 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-  mute: '<path d="M5 12h5l8-6v20l-8-6H5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m24 12 6 8m0-8-6 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
-  book: '<path d="M16 8C11 4 6 5 3 6v21c4-2 9-2 13 1 4-3 9-3 13-1V6c-4-1-9-2-13 2Zm0 0v20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
-};
-function icon(name, extra = '') { return `<svg class="symbol ${extra}" viewBox="0 0 32 32" aria-hidden="true">${paths[name] || paths.star}</svg>`; }
-function readWins() { try { return Math.max(0, Math.min(999, Number(localStorage.getItem('anya-adventure-wins')) || 0)); } catch { return 0; } }
-function saveWin() { wins++; try { localStorage.setItem('anya-adventure-wins', String(wins)); } catch { /* El juego también funciona sin almacenamiento. */ } }
-function announce(text) { $('#announcer').textContent = text; }
-function clearTimers() { timers.forEach(clearTimeout); timers.clear(); }
-function later(callback, ms) {
-  const timer = setTimeout(() => {
-    timers.delete(timer);
-    if (document.hidden || $$('dialog[open]').length) { later(callback, 250); return; }
-    callback();
-  }, ms);
-  timers.add(timer);
-  return timer;
+function welcome(){
+  dispose();state=null;document.body.classList.remove('in-adventure');saved=load();const resume=saved&&['playing','lost'].includes(saved.status);
+  main.innerHTML=`<section class="welcome appear" aria-label="Bienvenida a la aventura"><div class="hero"><div class="hero-copy"><span class="eyebrow">UN JARDÍN ENTERO PARA TUS OCHO AÑOS</span><h1>Anya y el<br>hechizo<br> <em class="title-accent">estirón</em></h1><p>¡Alessandro no para de crecer! Recorre el jardín con Pandora, encuentra sus secretos y prepara la poción que salvará tu fiesta.</p><div class="welcome-actions"><button class="button primary" id="start-button">${resume?'Continuar mi aventura':'¡Entrar al jardín!'} <span aria-hidden="true">↗</span></button>${resume?'<button class="text-button" id="new-button">Empezar otra aventura</button>':''}</div><div class="hero-note">${icon('leaf')} Explora, descubre y vuelve cuando quieras.</div>${resume?`<p class="save-note">Tu jardín te espera: ${saved.completed.length} de 18 retos · ${saved.treasures.length} de 8 secretos.</p>`:''}</div><div class="hero-art" role="img" aria-label="Anya, Pandora y Alessandro te esperan en su jardín mágico"><img class="garden-bg" src="assets/garden.svg" alt="">${art('alessandro')}${art('anya')}${art('pandora')}<div class="speech-bubble">Anya… ¿desde aquí se ven las nubes?</div><div class="birthday-sticker"><span>¡FELICES</span><b>8</b><span>AÑOS!</span></div><span class="art-label anya-label">Anya, la exploradora</span><span class="art-label pandora-label">Pandora, tu cómplice</span><span class="art-label alessandro-label">Alessandro ↑</span>${icon('star','hero-spark')}${icon('star','hero-spark small')}</div></div><div class="adventure-details"><div class="detail-item"><span class="detail-number">06</span><div><b>Zonas para descubrir</b><small>Un jardín en el que puedes moverte</small></div></div><div class="detail-item"><span class="detail-number">18</span><div><b>Retos que cambian</b><small>Más palabras, caminos e ideas</small></div></div><div class="detail-item">${icon('paw')}<div><b>Ocho pequeños secretos</b><small>Pandora sabe dónde buscar</small></div></div></div><div class="welcome-bottom"><p>${wins?`Ya celebramos ${wins} ${wins===1?'aventura':'aventuras'}. ¡Vamos a descubrir otra!`:'Flechas o WASD · Toca para caminar · Tu aventura se guarda en este navegador.'}</p><p>Crecer está bien. Este estirón es solo cosa de la magia.</p></div></section>`;
+  $('#start-button').addEventListener('click',()=>{if(resume){state=readSave(JSON.stringify(saved));challenges=generateChallenges(state.seed);if(state.status==='lost')showEnd(false);else renderGarden();}else newGame();});
+  $('#new-button')?.addEventListener('click',()=>openPanel(`<span class="eyebrow">OTRA PUERTA AL JARDÍN</span><h2 id="panel-title">¿Una aventura nueva?</h2><p>Los retos, las palabras y los secretos por descubrir volverán a empezar. Puedes seguir tu aventura actual si lo prefieres.</p><button class="button primary" id="confirm-new">Sí, un nuevo comienzo ↗</button><button class="text-button cancel-new">Seguir con mi jardín</button>`,()=>{$('#confirm-new').addEventListener('click',()=>{closePanel();newGame();});$('.cancel-new').addEventListener('click',closePanel);}));
 }
-function focusHeading() { const heading = $('h1, h2', main); if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); } }
-function topOfMain() { window.scrollTo({ top: 0, behavior: 'instant' }); }
-function playSound(kind = 'tap') {
-  if (!soundEnabled || document.hidden) return;
-  try {
-    audioContext ??= new (window.AudioContext || window.webkitAudioContext)();
-    audioContext.resume();
-    const notes = kind === 'win' ? [523, 659, 784, 1047] : kind === 'success' ? [523, 659, 784] : kind === 'error' ? [294, 262] : [587];
-    notes.forEach((frequency, i) => {
-      const oscillator = audioContext.createOscillator(); const gain = audioContext.createGain();
-      const start = audioContext.currentTime + i * 0.1;
-      oscillator.type = 'sine'; oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(0.045, start + 0.015); gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
-      oscillator.connect(gain); gain.connect(audioContext.destination); oscillator.start(start); oscillator.stop(start + 0.3);
-    });
-  } catch { soundEnabled = false; updateSoundButton(); }
-}
-function updateSoundButton() {
-  const button = $('#sound-button');
-  button.innerHTML = icon(soundEnabled ? 'sound' : 'mute');
-  button.setAttribute('aria-pressed', String(soundEnabled));
-  button.setAttribute('aria-label', soundEnabled ? 'Desactivar sonido' : 'Activar sonido');
-  button.title = soundEnabled ? 'Desactivar sonido' : 'Activar sonido';
-}
+function newGame(){const previous=saved?.seed??0;const values=new Uint32Array(1);if(window.crypto?.getRandomValues)crypto.getRandomValues(values);else values[0]=Date.now();const seed=values[0]===previous?(values[0]+1)>>>0:values[0];state=createGame(seed);challenges=generateChallenges(seed);save();renderGarden();showStory(1);}
 
-function welcome() {
-  clearTimers(); state = null; challenge = null; locked = false;
-  main.innerHTML = `<section class="welcome appear" aria-label="Bienvenida a la aventura"><div class="hero"><div class="hero-copy"><span class="eyebrow">PARA UNA NIÑA CON UNA GRAN IMAGINACIÓN</span><h1>Anya y el<br>hechizo<br> <em class="title-accent">estirón</em></h1><p>¡Alessandro no para de crecer! Un hechizo se ha colado en tu cumpleaños. Por suerte, tú y Pandora tienen un plan.</p><button class="button primary" id="start-button">¡Vamos a la aventura! <span aria-hidden="true">↗</span></button><div class="hero-note">${icon('clock')} Una partida cortita · Sin prisa · A tu ritmo</div></div><div class="hero-art" role="img" aria-label="Anya con su flor mágica, Pandora con un pañuelo verde y Alessandro, muy alto, con un globo de cumpleaños"><img class="garden-bg" src="assets/garden.svg" alt="">${art('alessandro')}${art('anya')}${art('pandora')}<div class="speech-bubble">Anya… ¡creo que me pasé de alto!</div><div class="birthday-sticker" aria-label="Felices 8 años"><span>¡FELICES</span><b>8</b><span>AÑOS!</span></div><span class="art-label anya-label">Anya, la aventurera</span><span class="art-label pandora-label">Pandora, tu cómplice</span><span class="art-label alessandro-label">Alessandro ↑</span>${icon('star', 'hero-spark')}${icon('star', 'hero-spark small')}</div></div><div class="adventure-details"><div class="detail-item"><span class="detail-number">06</span><div><b>Pequeños retos</b><small>Números, memoria e imaginación</small></div></div><div class="detail-item">${icon('paw')}<div><b>Una compañera especial</b><small>Pandora siempre tiene una pista</small></div></div><div class="detail-item">${icon('heart')}<div><b>Un regalo para ti</b><small>Hecho para celebrar tus 8 años</small></div></div></div><div class="welcome-bottom">${wins ? `<span class="saved-medal">${icon('star')} Ya rompiste el hechizo ${wins} ${wins === 1 ? 'vez' : 'veces'}. ¡Gran equipo!</span>` : '<p>Un poquito de magia, un poquito de ingenio y muchas ganas de ayudar.</p>'}<p>Crecer está bien. ¡Este estirón es solo cosa de la magia!</p></div></section>`;
-  $('#start-button').addEventListener('click', startGame);
+function renderGarden(){
+  dispose();document.body.classList.add('in-adventure');
+  main.innerHTML=`<section class="garden-game appear" aria-label="Aventura en el jardín"><div class="garden-toolbar"><div><span class="eyebrow" id="act-label">EL HECHIZO Y EL JARDÍN</span><h2 id="zone-title">Pradera del sol</h2></div><div class="garden-tools"><button class="tool-button" id="map-button">${icon('leaf')} Mapa</button><button class="tool-button" id="journal-button">${icon('book')} Bitácora</button><button class="tool-button" id="pause-button" aria-label="Pausar">${icon('pause')}<span class="pause-word">Pausar</span></button></div></div><div class="adventure-layout"><div class="garden-stage"><canvas id="garden-canvas" tabindex="0" aria-label="Jardín explorable. Usa flechas, WASD o toca un lugar para caminar."></canvas><div class="stage-tag"><span class="live-dot"></span>ANYA + PANDORA</div><div class="zoom-controls"><button id="zoom-out" aria-label="Ver más jardín">−</button><button id="zoom-in" aria-label="Acercar el jardín">+</button></div><div class="walk-pad" aria-label="Controles para caminar"><button data-direction="arrowup" aria-label="Caminar arriba">↑</button><button data-direction="arrowleft" aria-label="Caminar a la izquierda">←</button><button data-direction="arrowdown" aria-label="Caminar abajo">↓</button><button data-direction="arrowright" aria-label="Caminar a la derecha">→</button></div><div class="stage-actions"><button class="sniff-button" id="sniff-button" aria-label="Pandora, busca un tesoro">${icon('paw')}</button><button id="interact-button" class="interact-button">Explorar <span>E</span></button></div><div class="travel-indicator" id="travel-indicator" hidden>Siguiendo el sendero…</div></div><aside class="adventure-sidebar"><div class="mission-card"><span class="eyebrow">TU PEQUEÑA GRAN MISIÓN</span><h3>Un ingrediente,<br>una nueva historia.</h3><p id="mission-copy"></p><button class="text-button" id="guide-button">Muéstrame un reto <span aria-hidden="true">→</span></button></div><div class="potion-card"><div class="sidebar-heading"><b>Tu poción</b><span id="ingredient-count"></span></div><div class="ingredient-tray" id="inventory"></div><div class="quest-progress"><span id="quest-count"></span><div><i id="quest-bar"></i></div></div></div><div class="height-card"><div class="sidebar-heading"><b>El estirón</b><span id="growth-count"></span></div><div class="growth-track" id="growth-track"></div><p id="growth-caption"></p></div><div class="treasure-card"><div class="sidebar-heading"><b>${icon('star')} Estrellas secretas</b><span id="star-count"></span></div><p>Tres estrellas calman dos estirones. Pandora te ayuda a encontrarlas.</p><button id="soothe-button" class="text-button">Usar polvo de estrellas</button></div><p class="autosave-note">${icon('check')} Se guarda en este navegador.</p></aside></div><div class="garden-caption"><img src="assets/characters/pandora.webp" alt="Pandora"><p id="garden-message">Toca el suelo para caminar. Pandora te sigue. Los signos ? esconden retos.</p><button class="text-button" id="pet-button">Una caricia</button></div><p class="keyboard-note">Camina con flechas o WASD · Toca para ir a un lugar · E o espacio para explorar · Mapa para elegir tu camino</p></section>`;
+  $('.adventure-layout').append($('.garden-caption'));
+  garden=new Garden($('#garden-canvas'),()=>state,{message,interact:interactWith,collect:findTreasure,pet:petPandora,save,position:(position,zone,near)=>{
+    state.position=position;if(!state.visited.includes(zone)){state.visited.push(zone);save();}
+    $('#zone-title').textContent=ZONES[zone].name;
+    const action=$('#interact-button');action.innerHTML=`${near?(near.id==='final'?'La poción':near.id==='talk'?'Hablar':'Explorar'):'Olfatear'} <span>E</span>`;
+    const indicator=$('#travel-indicator');indicator.hidden=!garden?.path.length;
+  }});
+  $('#map-button').addEventListener('click',openMap);$('#journal-button').addEventListener('click',openJournal);$('#pause-button').addEventListener('click',pause);
+  $('#sniff-button').addEventListener('click',()=>garden.sniff());$('#pet-button').addEventListener('click',petPandora);$('#interact-button').addEventListener('click',()=>garden.interact());
+  $('#zoom-in').addEventListener('click',()=>garden.setZoom(.1));$('#zoom-out').addEventListener('click',()=>garden.setZoom(-.1));
+  $('#guide-button').addEventListener('click',()=>{const quest=nextQuest();if(quest)garden.travelTo(quest);else garden.travelTo({...CAULDRON,title:'la poción de Alessandro'});});
+  $('#soothe-button').addEventListener('click',()=>{const next=soothe(state);if(next===state)return;const healed=state.growth-next.growth;state=next;garden.sync();updateHud();save();sound('success');message(`Tus estrellas se convierten en polvo mágico. ¡${healed} ${healed===1?'estirón menos':'estirones menos'}!`);});
+  $$('.walk-pad button').forEach(button=>{const dir=button.dataset.direction;let pressed=0;button.addEventListener('pointerdown',e=>{e.preventDefault();pressed=performance.now();button.setPointerCapture(e.pointerId);garden.setDirection(dir,true);});for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,()=>garden?.setDirection(dir,false));button.addEventListener('click',()=>{if(performance.now()-pressed<220||!pressed)garden?.nudge(dir);});});
+  updateHud();window.scrollTo({top:0,behavior:'instant'});$('#garden-canvas').focus({preventScroll:true});
 }
-
-function startGame() { clearTimers(); state = createGame(); playSound('tap'); renderChapter(); topOfMain(); }
-const chapterInfo = [
-  ['EL CLARO DE LOS RAYITOS', 'Un poquito de sol', 'Las flores guardan el primer ingrediente. Cuenta sus rayitos para abrir el camino.'],
-  ['EL SENDERO SALTARÍN', 'Cada piedra, un salto', 'Este camino tiene un secreto. Descubre cómo cambian los números para cruzarlo.'],
-  ['EL JARDÍN DE LOS RECUERDOS', 'Dos de cada uno', 'Las flores esconden parejas. Encuentra las tres para despertar la flor de memoria.'],
-  ['EL RINCÓN DE PANDORA', 'Cuidar también es magia', 'Los pequeños gestos hacen que el jardín sea un lugar mejor para todos.'],
-  ['EL ÁRBOL DE LAS PALABRAS', 'La palabra que nos une', 'Una palabra se desordenó entre las hojas. Pon sus letras en su lugar.'],
-  ['EL TALLER DE LA MAGIA', 'La receta antiestirón', '¡Ya casi! Recuerda el orden de la receta y prepara la poción para Alessandro.']
-];
-
-function worldMarkup() {
-  return `<aside class="world-panel" aria-label="El jardín y el progreso del hechizo"><div class="world-scene ${state.growth >= 4 ? 'high-growth' : ''}" style="--growth:${state.growth}" role="img" aria-label="Alessandro lleva ${state.growth} de ${MAX_GROWTH} estirones mágicos"><img class="garden-bg" src="assets/garden.svg" alt="">${art('alessandro')}${art('anya')}${art('pandora')}<span class="scene-name">EL JARDÍN DE ANYA</span><span class="cloud-hat" aria-hidden="true">☁</span></div><div class="growth-panel"><span class="growth-heading">EL ESTIRÓN DE ALESSANDRO</span><span class="growth-count">${state.growth} / ${MAX_GROWTH}</span><div class="growth-track" aria-hidden="true">${Array.from({ length: MAX_GROWTH }, (_, i) => `<span class="growth-tick ${i < state.growth ? 'filled' : ''} ${i < state.growth && state.growth >= 4 ? 'danger' : ''}"></span>`).join('')}</div><p class="growth-caption">${GROWTH_MESSAGES[state.growth]}</p></div><div class="tray-caption">TU POCIÓN · ${state.ingredients.length} DE ${TOTAL_CHAPTERS}</div><div class="ingredient-tray" aria-label="Ingredientes de la poción">${INGREDIENTS.map((item, i) => `<div class="ingredient-slot ${state.ingredients.includes(i) ? 'collected' : ''} ${i === state.chapter ? 'current' : ''}" title="${item.name}${state.ingredients.includes(i) ? ': conseguido' : ': pendiente'}" role="img" aria-label="${item.name}: ${state.ingredients.includes(i) ? 'conseguido' : 'pendiente'}">${icon(item.icon)}</div>`).join('')}</div></aside>`;
+function updateHud(){
+  if(!garden)return;const ingredients=collectedIngredients(state),count=ingredients.length;
+  $('#act-label').textContent=count<2?'ACTO I · EL DESEO DEMASIADO GRANDE':count<4?'ACTO II · UN EQUIPO ENTRE LAS HOJAS':'ACTO III · LA MAGIA DE VOLVER A CASA';
+  $('#mission-copy').textContent=count===6?'Los seis ingredientes están listos. Vuelve al taller de Alessandro y prepara la poción.':`Resuelve los tres retos de cada zona para despertar su ingrediente. Elige tu camino: llevas ${state.completed.length} ${state.completed.length===1?'descubrimiento':'descubrimientos'}.`;
+  $('#ingredient-count').textContent=`${count} / 6`;
+  $('#inventory').innerHTML=INGREDIENTS.map((item,i)=>`<span class="ingredient-slot ${ingredients.includes(i)?'collected':''}" role="img" aria-label="${item.name}: ${ingredients.includes(i)?'conseguido':'pendiente'}" title="${item.name}">${icon(item.id)}</span>`).join('');
+  $('#quest-count').textContent=`${state.completed.length} de 18 retos descubiertos`;$('#quest-bar').style.width=`${state.completed.length/18*100}%`;
+  $('#growth-count').textContent=`${state.growth} / ${MAX_GROWTH}`;$('#growth-track').innerHTML=Array.from({length:MAX_GROWTH},(_,i)=>`<span class="growth-tick ${i<state.growth?'filled':''} ${state.growth>=7&&i<state.growth?'danger':''}"></span>`).join('');$('#growth-caption').textContent=GROWTH_MESSAGES[state.growth];
+  $('#star-count').textContent=`${state.treasures.length} / 8`;$('#soothe-button').disabled=state.treasures.length-state.spent<3||!state.growth;$('#soothe-button').textContent=`Usar polvo de estrellas (${state.treasures.length-state.spent} disponibles)`;
 }
-function updateWorld() { const world = $('.world-panel'); if (world) world.outerHTML = worldMarkup(); }
-
-function renderChapter() {
-  clearTimers(); locked = false; hintUsed = false;
-  const [eyebrow, title, intro] = chapterInfo[state.chapter];
-  main.innerHTML = `<section class="game-screen appear"><div class="game-topline"><span class="chapter-label"><span class="chapter-n">${state.chapter + 1}</span> CAPÍTULO ${state.chapter + 1} DE ${TOTAL_CHAPTERS}</span><button class="pause-button" id="pause-button">${icon('pause')} Pausar</button></div><div class="game-layout">${worldMarkup()}<section class="challenge-panel" aria-label="Reto actual"><span class="eyebrow">${eyebrow}</span><h2>${title}</h2><p class="challenge-intro">${intro}</p><div class="challenge-area"></div><div class="feedback" id="feedback" aria-live="polite">Puedes tomarte todo el tiempo que quieras.</div><div class="hint-panel"><img class="hint-portrait" src="assets/characters/pandora.webp" alt="Pandora"><div id="hint-content"><button class="hint-button" id="hint-button">Una pista de Pandora ${icon('paw')}</button></div></div></section></div></section>`;
-  $('#pause-button').addEventListener('click', () => openDialog($('#pause-dialog')));
-  $('#hint-button').addEventListener('click', showHint);
-  if (state.chapter === 0) renderMath();
-  if (state.chapter === 1) renderPattern();
-  if (state.chapter === 2) renderMemory();
-  if (state.chapter === 3) renderCare();
-  if (state.chapter === 4) renderWord();
-  if (state.chapter === 5) renderRecipe();
-  focusHeading();
+function nextQuest(){return QUESTS.filter(q=>!state.completed.includes(q.id)&&isUnlocked(state,q.zone)).sort((a,b)=>{const partial=zone=>QUESTS.filter(q=>q.zone===zone&&state.completed.includes(q.id)).length;return partial(b.zone)-partial(a.zone)||a.zone-b.zone;})[0];}
+function interactWith(target){
+  if(state.status!=='playing')return;
+  if(target.id==='talk'){talk();return;}
+  if(target.id==='final'){if(collectedIngredients(state).length<6){talk();return;}openQuest({...CAULDRON,title:'La poción antiestirón',type:'recipe',zone:-1});return;}
+  const quest=QUESTS.find(q=>q.id===target.id);if(!quest)return;
+  if(state.completed.includes(quest.id)){message('Aquí ya floreció tu descubrimiento. ¡Busca otro signo ? en el mapa!');return;}
+  if(!isUnlocked(state,quest.zone)){openPanel(`<span class="eyebrow">UN SECRETO PARA MÁS ADELANTE</span><h2 id="panel-title">El jardín se despierta poco a poco.</h2><p>Esta zona necesita ${ZONES[quest.zone].requires} ${ZONES[quest.zone].requires===1?'ingrediente':'ingredientes'} en tu poción. Completa los tres retos de una zona abierta y vuelve a explorar.</p><button class="button primary" id="go-open">Vamos a un reto abierto →</button>`,()=>$('#go-open').addEventListener('click',()=>{closePanel();garden.travelTo(nextQuest());}));return;}
+  openQuest(quest);
 }
-
-function setFeedback(message, type = '') {
-  const feedback = $('#feedback');
-  if (feedback) { feedback.className = `feedback ${type}`; feedback.innerHTML = `${icon(type === 'success' ? 'check' : type === 'error' ? 'leaf' : 'paw')}<span>${message}</span>`; }
+function openQuest(quest){
+  openPanel(`<span class="eyebrow">${quest.zone<0?'LOS SEIS INGREDIENTES ESTÁN LISTOS':ZONES[quest.zone].name.toUpperCase()}</span><h2 id="panel-title">${quest.title}</h2><div id="puzzle-host"></div><p class="puzzle-exit-note">Puedes volver al jardín y regresar a este reto cuando quieras.</p>`,()=>{
+    panel.classList.add('puzzle-dialog');puzzle=new Puzzle($('#puzzle-host'),challenges[quest.id],{sound,success:explanation=>complete(quest,explanation),mistake:()=>{
+      state=makeMistake(state);sound('error');garden.sync();updateHud();save();announce(GROWTH_MESSAGES[state.growth]);
+      if(state.status==='lost'){outcomeTimer=setTimeout(()=>{closePanel();showEnd(false);},1100);return false;}return true;
+    }});
+  });
 }
-function wrong(message, after) {
-  if (locked || state.status !== 'playing') return;
-  locked = true; state = makeMistake(state); updateWorld(); playSound('error');
-  setFeedback(message, 'error'); announce(`${message} ${GROWTH_MESSAGES[state.growth]} Estirón ${state.growth} de ${MAX_GROWTH}.`);
-  const scene = $('.world-scene'); scene?.classList.add('shake');
-  later(() => {
-    if (state.status === 'lost') { showEnd(false); return; }
-    scene?.classList.remove('shake'); locked = false; after?.();
-  }, state.status === 'lost' ? 1400 : 900);
+function complete(quest,explanation){
+  puzzle?.destroy();puzzle=null;sound('success');
+  if(quest.id==='final'){state=winGame(state);save();closePanel();showEnd(true);return;}
+  const before=collectedIngredients(state).length;state=completeQuest(state,quest.id);const ingredients=collectedIngredients(state),earned=ingredients.length>before;updateHud();garden.sync();save();
+  panel.innerHTML=`<span class="eyebrow">${earned?'UN INGREDIENTE DESPERTÓ':'UN NUEVO DESCUBRIMIENTO'}</span><div class="reward-icon">${icon(earned?INGREDIENTS[quest.zone].id:'star')}</div><h2 id="panel-title">${earned?'¡'+INGREDIENTS[quest.zone].name+'!':'¡Qué buena idea, Anya!'}</h2><p>${explanation}</p>${earned?'<p class="reward-extra">Esta zona florece, el hechizo se calma un poquito y guardamos un campamento para tu equipo.</p>':`<p class="reward-extra">${QUESTS.filter(q=>q.zone===quest.zone&&state.completed.includes(q.id)).length} de 3 retos en ${ZONES[quest.zone].name.toLowerCase()}.</p>`}<button class="button primary" id="back-garden">${ingredients.length===6?'¡Llevemos la poción!':'Volver a explorar'} <span aria-hidden="true">→</span></button>${state.completed.length%6===0?'<p class="quiet-note break-reminder">Pausa de exploradora: estira los brazos, mira algo que esté lejos y vuelve cuando quieras. Tu jardín está guardado.</p>':''}`;
+  $('#back-garden').addEventListener('click',()=>{closePanel();if(ingredients.length===6){garden.travelTo({...CAULDRON,title:'la poción de Alessandro'});return;}if(ingredients.length>=4&&state.story<3)showStory(3);else if(ingredients.length>=2&&state.story<2)showStory(2);});focusHeading(panel);announce(earned?`¡${INGREDIENTS[quest.zone].name} conseguido!`:explanation);
 }
-function complete(message) {
-  if (state.status !== 'playing') return;
-  state = finishChapter(state); locked = true; clearTimers(); updateWorld(); playSound('success');
-  const item = INGREDIENTS[state.chapter];
-  $('.challenge-panel').innerHTML = `<div class="reward"><div class="reward-icon">${icon(item.icon)}</div><span class="eyebrow">INGREDIENTE ${state.chapter + 1} DE ${TOTAL_CHAPTERS} CONSEGUIDO</span><h2>¡${item.name}!</h2><p>${message}</p><button class="button primary" id="next-button">${state.chapter === 5 ? '¡Romper el hechizo!' : 'Seguimos explorando'} <span aria-hidden="true">→</span></button>${state.chapter === 2 ? '<p class="break-note">Pausa de exploradora: mueve los hombros y mira algo que esté lejos. El jardín te espera.</p>' : '<p class="break-note">Cada descubrimiento nos acerca un poquito más.</p>'}</div>`;
-  $('#next-button').addEventListener('click', () => { if (state.status !== 'reward') return; state = nextChapter(state); if (state.status === 'won') showEnd(true); else renderChapter(); });
-  announce(`¡${item.name} conseguido! ${message}`); focusHeading();
+function findTreasure(treasure){state=collectTreasure(state,treasure.id);updateHud();save();sound('success');message(`¡Una estrella secreta! ${treasure.name}. ${treasure.text}${state.treasures.length===8?' ¡Encontraste las ocho! Pandora lleva ahora una chispa de oro.':''}`);}
+function petPandora(){state.pets=Math.min(3,state.pets+1);save();sound();message(['Pandora se sienta junto a ti y mueve la cola. ¡Qué buen equipo!','¡Guau! Pandora te da la patita. Los mejores tesoros se descubren con cariño.','Pandora se acurruca a tu lado. Una compañera de aventuras para siempre.'][state.pets-1]);}
+function openMap(){
+  openPanel(`<span class="eyebrow">ELIGE TU PROPIO CAMINO</span><h2 id="panel-title">El mapa de tu jardín</h2><p class="map-intro">Elige un reto y Anya caminará hasta allí con Pandora. También puedes explorar libremente.</p><div class="zone-map">${ZONES.map((zone,i)=>{const done=QUESTS.filter(q=>q.zone===i&&state.completed.includes(q.id)).length,open=isUnlocked(state,i);return `<section class="zone-card ${open?'':'zone-locked'}" style="--zone-color:${zone.color}"><div class="zone-card-heading">${icon(zone.icon)}<h3>${zone.name}</h3><span>${done}/3</span></div>${!open?`<p class="zone-lock-note">Sus retos despiertan con ${zone.requires} ${zone.requires===1?'ingrediente':'ingredientes'}.</p>`:''}<div class="zone-quests">${QUESTS.filter(q=>q.zone===i).map(q=>`<button data-go="${q.id}" ${state.completed.includes(q.id)?'disabled':''}><span>${state.completed.includes(q.id)?'✓':open?'?':'◇'}</span>${q.title}<b aria-hidden="true">→</b></button>`).join('')}</div><button class="text-button zone-walk" data-zone="${i}">Pasear por aquí</button></section>`;}).join('')}</div>${collectedIngredients(state).length===6?'<button class="button primary" id="map-final">Preparar la poción final →</button>':''}`,()=>{
+    panel.classList.add('map-dialog');$$('[data-go]',panel).forEach(b=>b.addEventListener('click',()=>{const q=QUESTS.find(q=>q.id===b.dataset.go);closePanel();garden.travelTo(q);}));$$('[data-zone]',panel).forEach(b=>b.addEventListener('click',()=>{const z=ZONES[Number(b.dataset.zone)];closePanel();garden.travelTo({...z,title:z.name});}));$('#map-final')?.addEventListener('click',()=>{closePanel();garden.travelTo({...CAULDRON,title:'la poción'});});
+  });
 }
-
-function bindChoices(correct, success, hint) {
-  challenge.hint = hint;
-  $$('.answer-button').forEach(button => button.addEventListener('click', () => {
-    if (locked || state.status !== 'playing' || button.disabled) return;
-    if (button.dataset.value === String(correct)) { button.classList.add('correct'); complete(success); }
-    else { button.classList.add('wrong'); button.disabled = true; wrong('Ese no era. Alessandro dio un estirón. ¡Prueba otra idea!'); }
-  }));
+function openJournal(){
+  openPanel(`<span class="eyebrow">GUARDA LO QUE VAS DESCUBRIENDO</span><h2 id="panel-title">La bitácora de Anya</h2><div class="journal-stats"><span><b>${state.completed.length}</b> retos</span><span><b>${state.treasures.length}</b> secretos</span><span><b>${state.visited.length}</b> rincones</span></div><h3 class="journal-section-title">Ocho pequeñas historias</h3><div class="discovery-grid">${TREASURES.map(t=>`<article class="discovery-card ${state.treasures.includes(t.id)?'discovered':''}">${icon(state.treasures.includes(t.id)?'star':'paw')}<h3>${state.treasures.includes(t.id)?t.name:'Un secreto por descubrir'}</h3><p>${state.treasures.includes(t.id)?t.text:'Pídele a Pandora que olfatee y sigue sus huellas.'}</p></article>`).join('')}</div><h3 class="journal-section-title">Las huellas de tu equipo</h3><div class="journal-badges"><span class="${state.visited.length===6?'earned':''}">◇ Exploradora de seis rincones</span><span class="${state.treasures.length===8?'earned':''}">★ Olfato de oro</span><span class="${state.pets>=3?'earned':''}">♡ Amigas de aventuras</span></div>`,()=>panel.classList.add('map-dialog'));
 }
-function numberOptions(options) { return `<div class="answer-grid">${options.map(number => `<button class="answer-button" data-value="${number}">${number}</button>`).join('')}</div>`; }
-function renderMath() {
-  challenge = { ...makeMath() };
-  const { a, b, answer, options } = challenge;
-  $('.challenge-area').innerHTML = `<div class="math-garden" role="img" aria-label="Un grupo de ${a} flores y otro de ${b} flores"><div class="flower-group">${Array.from({ length: a }, () => icon('flower')).join('')}</div><span class="math-sign" aria-hidden="true">+</span><div class="flower-group">${Array.from({ length: b }, () => icon('flower')).join('')}</div></div><p class="question">Hay ${a} flores y brotan ${b} más.<br>¿Cuántas flores hay en total?</p>${numberOptions(options)}`;
-  bindChoices(answer, `${a} + ${b} = ${answer}. Al sumar, juntamos los dos grupos. ¡El primer rayito es tuyo!`, `Empieza en ${a} y cuenta ${b} pasos más. También puedes contar las flores de una en una.`);
+function talk(){const count=collectedIngredients(state).length;openPanel(`<span class="eyebrow">ALESSANDRO DICE…</span><div class="story-character">${art('alessandro')}</div><h2 id="panel-title">${count<2?'¡Menudo deseo pedí!':count<4?'Desde aquí todo se ve pequeñito.':count<6?'¿Me guardaste un pedazo de torta?':'¡Anya, confío en ti!'}</h2><p>${count<2?'Soplé una vela y deseé crecer un montón… ¡pero era una vela mágica! Busca con Pandora los tres retos de cada zona. Necesitamos seis ingredientes.':count<4?'Mi sombra ya se pasea por todo el jardín. Menos mal que no estoy solo: contigo y Pandora siempre aparece otro camino.':count<6?'Las nubes hacen cosquillas, pero extraño estar a tu lado. Nos faltan unos ingredientes. Tú puedes, pequeña exploradora.':'¡Ya tienes los seis ingredientes! El caldero está justo a mi lado. Vamos a recordar la receta y a terminar con este estirón.'}</p><button class="button primary" id="story-continue">${count===6?'Vamos al caldero':'¡Seguimos juntos!'} →</button>`,()=>$('#story-continue').addEventListener('click',()=>{closePanel();if(count===6)garden.travelTo({...CAULDRON,title:'la poción'});}));}
+function showStory(act){
+  state.story=act;save();const stories={1:['Un deseo un poquito… enorme','Alessandro sopló una vela mágica y pidió crecer. ¡Y vaya si está creciendo! Tu cumpleaños se convirtió en una aventura. Recorre seis rincones, despierta sus ingredientes y prepara la poción. Pandora te acompañará en cada paso.'],2:['Nuevos caminos entre las hojas','¡Dos ingredientes! El roble abre sus historias y el huerto prepara una cosecha de ideas. Alessandro se ríe: «Nunca había visto un nido tan de cerca». Los retos que resuelves hacen florecer el jardín.'],3:['Una fiesta del tamaño del cariño','El jardín ya reconoce tus pasos. Pandora olfatea el último sendero y Alessandro te saluda desde arriba: «¡Las nubes no tienen pastel!». Descubre los ingredientes que faltan y vuelve al caldero para preparar la receta.']};
+  openPanel(`<span class="eyebrow">ACTO ${act===1?'I':act===2?'II':'III'} · TU AVENTURA EMPIEZA AQUÍ</span><div class="story-portraits"><img src="assets/characters/anya.webp" alt="Anya"><img src="assets/characters/pandora.webp" alt="Pandora"></div><h2 id="panel-title">${stories[act][0]}</h2><p>${stories[act][1]}</p><button class="button primary" id="story-start">${act===1?'¡Yo te ayudo, Alessandro!':'¡Vamos, Pandora!'} →</button>${act===1?'<p class="quiet-note">Toca un lugar para caminar o usa flechas / WASD. Busca los signos ? o abre el mapa.</p>':''}`,()=>$('#story-start').addEventListener('click',closePanel));
 }
-function renderPattern() {
-  challenge = { ...makePattern() };
-  const { values, answer, options, step } = challenge;
-  $('.challenge-area').innerHTML = `<div class="pattern-row" role="img" aria-label="Secuencia: ${values.join(', ')}, y un número desconocido">${[...values, '?'].map(value => `<span class="pattern-stone">${value}</span>`).join('')}</div><p class="question">¿Qué número sigue en el camino?</p>${numberOptions(options)}`;
-  bindChoices(answer, `¡Descubriste la regla! Cada salto suma ${step}. Después de ${values.at(-1)} viene ${answer}.`, `Cada piedra aumenta ${step}. Cuenta ${step} más desde la última: ${values.at(-1)}.`);
+function pause(){if(!garden)return;garden.stop();save();$('#pause-dialog').showModal();}
+function showEnd(won){
+  dispose();document.body.classList.remove('in-adventure');if(won){wins++;try{localStorage.setItem('anya-adventure-wins',String(wins));}catch{}sound('win');}
+  main.innerHTML=`<section class="end-screen appear"><div class="end-copy"><span class="eyebrow">${won?'LA AVENTURA MÁS BONITA SE HACE EN EQUIPO':'HASTA LAS EXPLORADORAS DESCANSAN'}</span>${won?`<div class="end-badge">${icon('star')} GUARDIANA DEL JARDÍN · 18 RETOS · ${state.treasures.length} SECRETOS</div>`:''}<h1>${won?'Un jardín de historias.<br><em class="title-accent">¡Felices ocho, Anya!</em>':'Alessandro tocó<br><em class="title-accent">las nubes…</em>'}</h1><p>${won?'Alessandro volvió a su tamaño y Pandora corre feliz entre las flores que despertaste. La fiesta puede empezar. Fue tu curiosidad, tu paciencia y tu cariño lo que hizo especial esta aventura.':'El estirón ganó esta vez. Pandora ya tiene un plan: volver al último campamento con lo que aprendieron. Conservarás tus estrellas y los ingredientes de ese campamento.'}</p>${won?'<div class="birthday-message">Que crezcan tus sueños, tus preguntas<br>y las aventuras que compartes.<br>Te queremos un montón.</div>':''}<button class="button primary" id="end-primary">${won?'Un jardín de retos nuevo':'Volver al campamento'} <span aria-hidden="true">↗</span></button><button class="text-button" id="end-home">Volver al inicio</button><p class="end-note">${won?'Ahora toca celebrar fuera de la pantalla. ¡Un abrazo para tu gran equipo!':'Respira, estira los brazos y vuelve cuando estés lista. El jardín te espera.'}</p></div><div class="end-art ${won?'':'lost'}" role="img" aria-label="Anya, Pandora y Alessandro en el jardín"><img class="garden-bg" src="assets/garden.svg" alt="">${art('alessandro')}${art('anya')}${art('pandora')}<div class="birthday-sticker"><span>¡FELICES</span><b>8</b><span>ANYA!</span></div></div></section>`;
+  $('#end-primary').addEventListener('click',()=>{if(won)newGame();else{state=restoreCheckpoint(state);challenges=generateChallenges(state.seed);save();renderGarden();message('¡De vuelta en el campamento! Tus descubrimientos importantes siguen contigo.');}});$('#end-home').addEventListener('click',welcome);save();announce(won?'¡Felices ocho años, Anya! Los seis ingredientes rompieron el hechizo. Tu equipo te espera para celebrar.':'El hechizo ganó esta vez. Puedes volver al último campamento y seguir aprendiendo con Pandora.');if(won)confetti();focusHeading();window.scrollTo({top:0,behavior:'instant'});
 }
-function renderMemory() {
-  challenge = { cards: makeMemory(), selected: [], matched: [], hint: 'Mira bien dónde está cada dibujo. Voy a enseñarte todas las cartas un momentito.' };
-  $('.challenge-area').innerHTML = `<p class="memory-progress" id="memory-progress">0 de 3 parejas encontradas</p><div class="memory-grid">${challenge.cards.map(card => `<button class="memory-card" data-card="${card.id}" aria-label="Carta ${card.id + 1}, boca abajo" aria-pressed="false">${icon('paw', 'card-back')}</button>`).join('')}</div>`;
-  $$('.memory-card').forEach(button => button.addEventListener('click', () => flipCard(Number(button.dataset.card))));
-}
-function drawCard(id, reveal) {
-  const card = challenge.cards.find(card => card.id === id);
-  const button = $(`[data-card="${id}"]`); if (!button) return;
-  const matched = challenge.matched.includes(id);
-  button.innerHTML = reveal ? `${icon(card.symbol)}${matched ? '<span class="matched-check" aria-hidden="true">✓</span>' : ''}` : icon('paw', 'card-back');
-  button.classList.toggle('revealed', reveal); button.classList.toggle('matched', matched);
-  button.setAttribute('aria-label', `Carta ${id + 1}, ${reveal ? labels[card.symbol] : 'boca abajo'}${matched ? ', pareja encontrada' : ''}`);
-  button.setAttribute('aria-pressed', String(reveal)); button.disabled = matched;
-}
-function flipCard(id) {
-  if (locked || state.status !== 'playing' || challenge.matched.includes(id) || challenge.selected.includes(id)) return;
-  challenge.selected.push(id); drawCard(id, true); playSound();
-  if (challenge.selected.length < 2) return;
-  const [a, b] = challenge.selected;
-  if (challenge.cards[a].symbol === challenge.cards[b].symbol) {
-    challenge.matched.push(a, b); challenge.selected = []; drawCard(a, true); drawCard(b, true);
-    $('#memory-progress').textContent = `${challenge.matched.length / 2} de 3 parejas encontradas`;
-    if (challenge.matched.length === 6) complete('Encontraste las tres parejas. Observar con calma ayuda a recordar. ¡Tu memoria hizo magia!');
-    else { setFeedback('¡Una pareja! Sigue mirando con calma.', 'success'); playSound('success'); }
-  } else wrong('Son diferentes. Recuerda sus lugares para la próxima.', () => { drawCard(a, false); drawCard(b, false); challenge.selected = []; });
-}
-function renderCare() {
-  const care = CARE_QUESTIONS[Math.floor(Math.random() * CARE_QUESTIONS.length)];
-  challenge = { ...care };
-  $('.challenge-area').innerHTML = `<p class="question">${care.question}</p><div class="choice-list">${shuffle(care.options).map((answer, i) => `<button class="answer-button" data-value="${answer}"><span class="option-dot" aria-hidden="true">${String.fromCharCode(65 + i)}</span>${answer}</button>`).join('')}</div>`;
-  bindChoices(care.answer, care.explanation, care.hint);
-}
-function renderWord() {
-  challenge = { word: 'EQUIPO', letters: shuffle([...('EQUIPO')]), selected: [], hint: 'La palabra es E-Q-U-I-P-O. Busca primero la E y después la Q. ¡Juntos llegamos más lejos!' };
-  $('.challenge-area').innerHTML = `<p class="question">Cuando nos ayudamos, somos un…<br><span class="quiet-note">Ordena las 6 letras para descubrirlo.</span></p><div class="word-slots" id="word-slots" role="status" aria-label="Palabra por formar"></div><div class="letter-tiles">${challenge.letters.map((letter, i) => `<button class="letter-tile" data-letter="${i}" aria-label="Letra ${letter}">${letter}</button>`).join('')}</div><div class="word-actions"><button class="text-button" id="erase-button">Borrar última</button><button class="button secondary" id="check-word" disabled>Comprobar ${icon('check')}</button></div>`;
-  $$('.letter-tile').forEach(button => button.addEventListener('click', () => { if (locked || challenge.selected.length === 6) return; challenge.selected.push(Number(button.dataset.letter)); button.disabled = true; updateWord(); playSound(); }));
-  $('#erase-button').addEventListener('click', () => { if (locked || !challenge.selected.length) return; const index = challenge.selected.pop(); $(`[data-letter="${index}"]`).disabled = false; updateWord(); });
-  $('#check-word').addEventListener('click', () => {
-    if (locked || challenge.selected.length !== 6) return;
-    if (challenge.selected.map(i => challenge.letters[i]).join('') === challenge.word) complete('E-Q-U-I-P-O. Ayudarnos, escucharnos y compartir las ideas nos hace un gran equipo. ¡Tú, Pandora y Alessandro!');
-    else wrong('Las letras quieren cambiar de sitio. ¡Pandora puede darte una pista!', () => { challenge.selected = []; $$('.letter-tile').forEach(button => { button.disabled = false; }); updateWord(); });
-  }); updateWord();
-}
-function updateWord() {
-  const text = challenge.selected.map(i => challenge.letters[i]);
-  $('#word-slots').innerHTML = Array.from({ length: 6 }, (_, i) => `<span class="word-slot" aria-hidden="true">${text[i] || ''}</span>`).join('');
-  $('#word-slots').setAttribute('aria-label', text.length ? `Tu palabra: ${text.join(', ')}` : 'Palabra por formar, seis letras');
-  $('#check-word').disabled = text.length !== 6; $('#erase-button').disabled = !text.length;
-}
-function renderRecipe() {
-  challenge = { recipe: shuffle(['sun', 'drop', 'leaf', 'star']), selected: [], studying: true, hint: '' };
-  challenge.hint = `El orden es: ${challenge.recipe.map(key => labels[key].toLowerCase()).join(', ')}. Puedes volver a mirar la receta cuando quieras.`;
-  drawRecipe();
-}
-function drawRecipe() {
-  const area = $('.challenge-area');
-  if (challenge.studying) {
-    area.innerHTML = `<p class="question">Mira la receta, en este orden:</p><div class="recipe-peek">${challenge.recipe.map((key, i) => `<div class="recipe-step"><b>${i + 1}</b>${icon(key)}<small>${labels[key]}</small></div>`).join('')}</div><p class="recipe-reminder">Mírala todo el tiempo que necesites. Después, toca los ingredientes en el mismo orden.</p><button class="button secondary recipe-study-button" id="remember-recipe">¡Ya me la sé! <span aria-hidden="true">→</span></button>`;
-    $('#remember-recipe').addEventListener('click', () => { challenge.studying = false; challenge.selected = []; drawRecipe(); });
-  } else {
-    area.innerHTML = `<p class="question">Toca los ingredientes en el orden de la receta.</p><div class="recipe-dots" aria-label="${challenge.selected.length} de 4 ingredientes en orden">${Array.from({ length: 4 }, (_, i) => `<span class="recipe-dot ${i < challenge.selected.length ? 'done' : ''}"></span>`).join('')}</div><div class="recipe-options">${['sun', 'drop', 'leaf', 'star'].map(key => `<button class="recipe-button" data-ingredient="${key}">${icon(key)}${labels[key]}</button>`).join('')}</div><button class="text-button" id="study-again" style="margin-top:18px">Volver a mirar la receta</button>`;
-    $('#study-again').addEventListener('click', () => { if (locked) return; challenge.studying = true; challenge.selected = []; drawRecipe(); });
-    $$('.recipe-button').forEach(button => button.addEventListener('click', () => {
-      if (locked || state.status !== 'playing') return;
-      const choice = button.dataset.ingredient;
-      if (choice !== challenge.recipe[challenge.selected.length]) {
-        wrong('La receta se mezcló. ¡Vamos a mirarla otra vez!', () => { challenge.studying = true; challenge.selected = []; drawRecipe(); }); return;
-      }
-      challenge.selected.push(choice); playSound();
-      if (checkRecipe(challenge.selected, challenge.recipe)) complete('Sol, agua, naturaleza y tu chispa especial. ¡La poción antiestirón está lista para romper el hechizo!');
-      else { drawRecipe(); setFeedback(`¡Bien! ${challenge.selected.length} de 4 ingredientes en su lugar.`, 'success'); }
-    }));
-  }
-}
-function showHint() {
-  if (hintUsed || locked || state?.status !== 'playing') return;
-  hintUsed = true;
-  $('#hint-content').innerHTML = `<p class="hint-copy">${challenge.hint}</p>`;
-  announce(`Pandora dice: ${challenge.hint}`); playSound();
-  if (state.chapter === 2) {
-    locked = true;
-    challenge.cards.forEach(card => drawCard(card.id, true));
-    later(() => { challenge.cards.forEach(card => drawCard(card.id, challenge.matched.includes(card.id) || challenge.selected.includes(card.id))); locked = false; }, 3000);
-  }
-}
-
-function showEnd(won) {
-  clearTimers(); locked = true;
-  if (won) { saveWin(); playSound('win'); }
-  const title = won ? 'Un hechizo menos.<br><em class="title-accent">¡Un cumpleaños más!</em>' : 'Se nos fue<br>un poquito<br><em class="title-accent">de las manos…</em>';
-  main.innerHTML = `<section class="end-screen appear"><div class="end-copy"><span class="eyebrow">${won ? 'MISIÓN CUMPLIDA, PEQUEÑA AVENTURERA' : 'EL HECHIZO GANÓ ESTA VEZ'}</span>${won ? `<div class="end-badge">${icon('star')} GUARDIANA DEL JARDÍN · 6 DE 6 INGREDIENTES</div>` : ''}<h1>${title}</h1><p>${won ? '¡Lo lograste, Anya! Alessandro volvió a su tamaño de siempre. Pandora mueve la cola y el jardín está listo para tu fiesta.' : 'Alessandro creció tanto que las nubes le hacen cosquillas. La fiesta tendrá que esperar un momentito. ¡Con tus ideas y las pistas de Pandora pueden intentarlo otra vez!'}</p>${won ? '<div class="birthday-message">Que tus 8 estén llenos de curiosidad,<br>aventuras y personas que te quieran.</div>' : ''}<button class="button primary" id="replay-button">${won ? 'Otra pequeña aventura' : '¡Lo intentamos otra vez!'} <span aria-hidden="true">↗</span></button><button class="text-button" id="end-home-button">Volver al inicio</button><p class="end-note">${won ? 'Ahora toca celebrar fuera de la pantalla. ¡Un abrazo para tu gran equipo!' : 'Cada intento enseña algo. Puedes descansar y volver cuando quieras.'}</p></div><div class="end-art ${won ? '' : 'lost'}" role="img" aria-label="${won ? 'Anya, Pandora y Alessandro celebran juntos en el jardín' : 'Alessandro toca las nubes mientras Anya y Pandora preparan un nuevo plan'}"><img class="garden-bg" src="assets/garden.svg" alt="">${art('alessandro')}${art('anya')}${art('pandora')}${won ? '<div class="birthday-sticker"><span>¡FELICES</span><b>8</b><span>ANYA!</span></div>' : '<span class="cloud-hat" style="opacity:1;right:5%;top:3%" aria-hidden="true">☁</span>'}</div></section>`;
-  $('#replay-button').addEventListener('click', startGame);
-  $('#end-home-button').addEventListener('click', () => { welcome(); topOfMain(); focusHeading(); });
-  if (won) confetti(); announce(won ? '¡Felicidades, Anya! Rompiste el hechizo y Alessandro volvió a su tamaño. ¡Felices ocho años!' : 'El hechizo ganó esta vez. Puedes volver a intentarlo con las pistas de Pandora.');
-  focusHeading(); topOfMain();
-}
-function confetti() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const confetti = document.createElement('div'); confetti.className = 'confetti'; confetti.setAttribute('aria-hidden', 'true');
-  const colors = ['#d7a14a', '#8ca47a', '#ca8a75', '#9fbabc'];
-  confetti.innerHTML = Array.from({ length: 36 }, (_, i) => `<span style="left:${Math.random() * 100}%;background:${colors[i % colors.length]};animation-delay:${Math.random() * 0.8}s;border-radius:${i % 2 ? '50%' : '1px'}"></span>`).join('');
-  document.body.append(confetti); setTimeout(() => confetti.remove(), 4500);
-}
-function openDialog(dialog) { if (dialog.open) return; lastFocus = document.activeElement; dialog.showModal(); }
-function closeDialog(dialog) { dialog.close(); lastFocus?.focus({ preventScroll: true }); }
-$('#sound-button').addEventListener('click', () => { soundEnabled = !soundEnabled; updateSoundButton(); if (soundEnabled) playSound(); else audioContext?.suspend(); });
-$('#help-button').addEventListener('click', () => openDialog($('#help-dialog')));
-$$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => closeDialog(button.closest('dialog'))));
-$('#resume-button').addEventListener('click', () => closeDialog($('#pause-dialog')));
-$('#quit-button').addEventListener('click', () => { $('#pause-dialog').close(); welcome(); topOfMain(); focusHeading(); });
-$('#home-link').addEventListener('click', event => { event.preventDefault(); if (state && ['playing', 'reward'].includes(state.status)) openDialog($('#pause-dialog')); else { welcome(); topOfMain(); focusHeading(); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { audioContext?.suspend(); if (state && ['playing', 'reward'].includes(state.status) && !$$('dialog[open]').length) openDialog($('#pause-dialog')); } });
-updateSoundButton(); welcome();
+function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const el=document.createElement('div');el.className='confetti';el.setAttribute('aria-hidden','true');el.innerHTML=Array.from({length:36},(_,i)=>`<span style="left:${Math.random()*100}%;background:${['#d7a14a','#8ca47a','#ca8a75','#9fbabc'][i%4]};animation-delay:${Math.random()*.8}s"></span>`).join('');document.body.append(el);setTimeout(()=>el.remove(),4500);}
+panel.addEventListener('close',()=>{if(!panel.open)panel.classList.remove('puzzle-dialog','map-dialog');});
+$('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;updateSound();if(soundEnabled)sound();else audioContext?.suspend();});
+$('#help-button').addEventListener('click',()=>{garden?.stop();$('#help-dialog').showModal();});
+$$('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
+$('#resume-button').addEventListener('click',()=>{$('#pause-dialog').close();$('#garden-canvas')?.focus({preventScroll:true});});
+$('#quit-button').addEventListener('click',()=>{$('#pause-dialog').close();save();welcome();});
+$('#home-link').addEventListener('click',e=>{e.preventDefault();if(garden)pause();else welcome();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){audioContext?.suspend();garden?.stop();save();if(garden&&!$('dialog[open]')&&state.status==='playing')pause();}});
+window.addEventListener('pagehide',save);updateSound();welcome();

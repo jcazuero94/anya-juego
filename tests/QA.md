@@ -1,33 +1,24 @@
-# Comprobación de interfaz
+# Verificación de la aventura del jardín
 
-Verificación del 16 de octubre de 2026: partida completa hasta victoria, derrota al quinto error, reinicio, pistas, parejas, borrado de letras, recuperación de receta, pausa, ayuda y sonido comprobados en navegador. Pantallas de 390 × 844, 320 × 740 y escritorio revisadas. Sin imágenes faltantes ni errores de consola. Se corrigieron el nombre accesible de la ayuda y el desbordamiento horizontal en pantallas estrechas.
+La lógica se verifica con `npm test` (27 pruebas). La sintaxis de todos los módulos se revisa con `npm run check`. La interfaz se comprueba en el navegador con acciones sobre sus controles reales.
 
-Abrir el juego desde `npm start` o desde su URL pública. Todas las interacciones se realizan con botones; no se necesita teclado físico.
+Revisión del 16 de octubre de 2026: completados los 18 retos y la receta final mediante controles de la interfaz; comprobados los tres actos, la derrota al noveno error, el campamento, la recarga con progreso conservado, las caricias, el olfateo, la recogida y el gasto de tres estrellas, la bitácora, el minimapa, el borrado de letras y la recuperación de una receta equivocada. Revisados el jardín y los retos a 390 y 320 píxeles, sin desbordamiento horizontal ni errores de consola. Las pruebas de rutas verifican todos los destinos con cada tamaño de Alessandro.
 
-## Partida completa
+## Recorrido de revisión
 
-- Inicio: se ven los tres personajes y el botón de aventura.
-- Sumas: una respuesta equivocada añade un solo estirón; queda deshabilitada. La pista permite contar ambos grupos. La respuesta correcta consigue el primer ingrediente.
-- Patrones: la respuesta correcta sigue el incremento constante de las cuatro piedras.
-- Memoria: la pista revela las seis cartas temporalmente sin añadir estirones. Una pareja se conserva y no se puede volver a seleccionar. Dos cartas diferentes se ocultan tras la respuesta y añaden un estirón. Tres parejas permiten continuar.
-- Cuidado: exactamente una de las tres respuestas consigue el ingrediente. La explicación confirma el gesto de cuidado.
-- Palabras: se puede seleccionar una letra y borrarla. Comprobar solo se habilita con seis letras. EQUIPO supera el reto.
-- Receta: se estudia sin límite de tiempo. Se puede volver a consultar. Un error añade un estirón y muestra de nuevo la receta. La secuencia correcta consigue el sexto ingrediente.
-- Final: romper el hechizo muestra la felicitación para Anya y a Alessandro de su tamaño normal. Volver a jugar reinicia todos los ingredientes y el estirón.
+1. Entrar al jardín y cerrar la introducción. Anya y Pandora aparecen en un mundo explorable.
+2. Caminar con los botones, tocar el suelo o el minimapa y comprobar que la cámara acompaña a Anya. Los senderos rodean el estanque, los árboles y los huertos.
+3. Pedir a Pandora que busque. Seguirla hasta una estrella y comprobar el inventario y la bitácora. Tres estrellas permiten calmar dos estirones; no se pueden gastar dos veces.
+4. Elegir retos en el mapa o usar la sugerencia de la misión. Anya recorre la ruta y el reto se abre al llegar.
+5. Completar los tres retos de una zona: debe aparecer su ingrediente, disminuir un estirón y abrirse nuevas zonas. Los retos terminados quedan marcados y florecen en el mundo.
+6. Recargar, continuar y comprobar la semilla, la posición aproximada, los ingredientes y las estrellas. La misma partida conserva sus retos.
+7. Jugar los doce tipos de reto. Probar una pista de cartas, una equivocación, borrar una letra, repasar una secuencia, reflejar un patrón y atravesar un laberinto.
+8. Provocar nueve errores y volver al campamento. Se conservan las estrellas y los ingredientes del último campamento; los retos posteriores vuelven a estar pendientes.
+9. Completar los 18 retos, volver a Alessandro y resolver la receta de seis símbolos. Debe aparecer la felicitación y una nueva aventura debe tener otros retos.
+10. Revisar el mapa, la bitácora, la ayuda, la pausa y el sonido en escritorio y en pantallas de 390 y 320 píxeles. No debe haber desbordamiento horizontal, imágenes faltantes ni errores de consola.
 
-## Derrota y controles
+## Publicación
 
-- Reunir cinco errores a lo largo de la partida muestra el final de derrota, sin más acciones sobre retos anteriores.
-- Volver a intentarlo abre una partida nueva con cero errores.
-- Pausar abre un diálogo y conserva la partida. Seguir jugando la reanuda. Volver al inicio permite empezar desde cero.
-- Cómo jugar se cierra con su botón o Escape. Tab y Enter permiten jugar; los encabezados reciben el foco al cambiar de reto.
-- El sonido comienza apagado, puede activarse y desactivarse. Cambiar de pestaña pausa la partida.
+Después del despliegue, comparar los archivos publicados con los locales y probar una jugada desde la URL pública. Los módulos y estilos de esta versión usan `?v=2` para evitar mezclas con los recursos de la primera edición.
 
-## Pantallas y recursos
-
-- Revisar a 390 × 844, 320 × 740 y en escritorio; no debe haber desplazamiento horizontal ni controles cortados.
-- Comprobar imágenes y fuente local, sin recursos faltantes ni errores de JavaScript.
-- Comprobar que `prefers-reduced-motion: reduce` elimina las animaciones y el confeti.
-- Bloquear el almacenamiento local no impide completar el juego.
-
-Pruebas de lógica reproducibles: `npm test` (14 casos).
+Las fotos originales de `Fotos/` no forman parte del repositorio ni del sitio.
