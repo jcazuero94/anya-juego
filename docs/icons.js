@@ -1,6 +1,8 @@
 export const art = (name, extra = '') => `<img class="character ${name} ${extra}" src="assets/characters/${name}.webp" alt="" draggable="false">`;
 export const labels = { sun: 'Sol', leaf: 'Hoja', flower: 'Flor', drop: 'Gota', heart: 'Corazón', star: 'Estrella' };
 const paths = {
+  ball:'<circle cx="16" cy="16" r="12" fill="#d99578" stroke="#a96d57" stroke-width="1.4"/><path d="M7 8c15 3 2 13 18 16M25 8c-15 3-2 13-18 16" stroke="#fff0cc" stroke-width="2" fill="none"/>',
+  treat:'<path d="M9 10a4 4 0 1 0-5 5 4 4 0 1 0 5 5h14a4 4 0 1 0 5-5 4 4 0 1 0-5-5Z" fill="#dec38a" stroke="#b39560" stroke-width="1.3"/><path d="M13 14h6m-6 3h6" stroke="#c2a36f" stroke-width="1.2"/>',
   candle:'<path d="M12 14h8v15h-8z" fill="#d89583" stroke="#ac6f5c"/><path d="m12 18 8 5m-8 0 8 5" stroke="#fff0c9" stroke-width="2"/><path d="M16 2c-7 7-4 11 0 10s6-5 0-10Z" fill="#edba54"/><path d="M16 10v5" stroke="#8b6f42"/>',
   flour:'<path d="m9 5 2 5-5 17c6 4 14 4 20 0l-5-17 2-5Z" fill="#e7d9ad" stroke="#a58a58" stroke-width="1.3"/><path d="M10 10h12" stroke="#a58a58"/><ellipse cx="16" cy="21" rx="5" ry="6" fill="#fff6da"/><path d="M16 25V16m0 5-3-2m3 0 3-2" stroke="#b79a58" stroke-width="1.3"/>',
   eggs:'<path d="M16 4C12 4 7 14 7 20a9 9 0 0 0 18 0c0-6-5-16-9-16Z" fill="#f4e4be" stroke="#b79a73" stroke-width="1.3"/><path d="M11 19c0-4 2-8 4-10" stroke="#fff9e7" stroke-width="2" stroke-linecap="round"/>',

@@ -1,5 +1,7 @@
-import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3';
-import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3';
+import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.1';
+import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.1';
+
+import { Companion } from './companion.js?v=3.1';
 
 const TAU=Math.PI*2;
 function ellipse(ctx,x,y,rx,ry,fill) { ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=fill;ctx.fill(); }
@@ -11,14 +13,14 @@ function label(ctx,text,x,y,{small=false,color='#365643',paper=true}={}) { ctx.f
 export class Garden {
   constructor(canvas,getState,callbacks) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.getState=getState;this.callbacks=callbacks;
-    this.reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;this.player=safePosition(getState().position,getState().growth);this.dog={x:this.player.x-48,y:this.player.y+30};
-    this.camera={...this.player};this.path=[];this.dogPath=[];this.keys=new Set();this.walk=0;this.facing=1;this.zoom=1;this.revealed=new Set();this.history=[];this.last=0;this.uiTime=0;this.saveTime=0;this.target=null;this.dogTarget=null;
+    this.reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;this.player=safePosition(getState().position,getState().growth);this.companion=new Companion(safePosition({x:this.player.x-48,y:this.player.y+30}));this.dog=this.companion.position;
+    this.camera={...this.player};this.path=[];this.keys=new Set();this.walk=0;this.facing=1;this.zoom=1;this.revealed=new Set();this.history=[];this.last=0;this.uiTime=0;this.saveTime=0;this.target=null;
     this.images={};for(const name of ['anya','pandora','alessandro','alyssia']){const img=new Image();img.src=`assets/characters/${name}.webp`;this.images[name]=img;}
     this.ground=this.paintGround();
     this.keydown=e=>{
       if(this.paused()||e.ctrlKey||e.metaKey||e.altKey)return;
       const key=e.key.toLowerCase();
-      if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)){e.preventDefault();this.keys.add(key);this.path=[];this.target=null;}
+      if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)){e.preventDefault();this.keys.add(key);this.path=[];this.target=null;this.companion.cancelGuide();}
       if((key==='e'||key===' ')&&!e.repeat&&e.target.tagName!=='BUTTON'){e.preventDefault();this.interact();}
     };
     this.keyup=e=>this.keys.delete(e.key.toLowerCase());this.blur=()=>this.keys.clear();
@@ -32,24 +34,29 @@ export class Garden {
   paused(){return this.destroyed||document.hidden||document.querySelector('dialog[open]')||this.getState()?.status!=='playing';}
   resize(){const box=this.canvas.getBoundingClientRect();this.width=box.width;this.height=box.height;const dpr=Math.min(2,window.devicePixelRatio||1);this.canvas.width=Math.round(box.width*dpr);this.canvas.height=Math.round(box.height*dpr);this.dpr=dpr;this.scale=(box.width<600?.82:.95)*this.zoom;}
   setZoom(delta){this.zoom=Math.max(.65,Math.min(1.25,this.zoom+delta));this.resize();}
-  setDirection(key,pressed){if(pressed){this.keys.add(key);this.path=[];this.target=null;}else this.keys.delete(key);}
-  stop(){this.keys.clear();this.path=[];this.target=null;}
-  sync(){this.player=safePosition(this.player,this.getState().growth);this.dog=safePosition(this.dog,this.getState().growth);this.path=[];this.dogPath=[];}
-  nudge(direction){const [dx,dy]=({arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]})[direction];const target={x:this.player.x+dx*48,y:this.player.y+dy*48};if(!isBlocked(target.x,target.y,this.getState().growth)){this.path=findPath(this.player,target,this.getState().growth);this.target=null;}}
-  travelTo(target){
+  setDirection(key,pressed){if(pressed){this.keys.add(key);this.path=[];this.target=null;this.companion.cancelGuide();}else this.keys.delete(key);}
+  stop(){this.keys.clear();this.path=[];this.target=null;this.companion.cancelGuide();}
+  sync(){this.player=safePosition(this.player,this.getState().growth);Object.assign(this.dog,safePosition(this.dog,this.getState().growth));this.companion.cancel();this.path=[];}
+  nudge(direction){this.companion.cancelGuide();const [dx,dy]=({arrowup:[0,-1],arrowdown:[0,1],arrowleft:[-1,0],arrowright:[1,0]})[direction];const target={x:this.player.x+dx*48,y:this.player.y+dy*48};if(!isBlocked(target.x,target.y,this.getState().growth)){this.path=findPath(this.player,target,this.getState().growth);this.target=null;}}
+  travelTo(target,{guided=false}={}){
+    this.companion.cancel();
     const growth=this.getState().growth,station=QUESTS.some(q=>q.id===target.id)||target.id?.startsWith('station-')||target.id==='final'||target.id==='talk';
     const approach=station?[[70,25],[-70,25],[0,85],[70,-25],[-70,-25],[0,-85]].map(([dx,dy])=>({x:target.x+dx,y:target.y+dy})).find(p=>!isBlocked(p.x,p.y,growth)):null;
     const route=findPath(this.player,approach||target,growth);
     if(!route.length){this.callbacks.message('Pandora busca otra ruta. Toca un claro cercano.');return false;}
-    this.path=route;this.target=target;this.keys.clear();this.callbacks.message(`Vamos hacia ${target.title||target.name||'ese rincón'}. Puedes cambiar de camino cuando quieras.`);
+    this.path=route;this.target=target;this.keys.clear();if(guided)this.companion.lead(route,this.player);this.callbacks.message(`Vamos hacia ${target.title||target.name||'ese rincón'}. Puedes cambiar de camino cuando quieras.`);
     const box=this.canvas.getBoundingClientRect();if(box.top<0||box.bottom>window.innerHeight)this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});return true;
   }
+  guideTo(target){const moved=this.travelTo(target,{guided:true});if(moved)this.callbacks.message(`¡Guau! Pandora te guía hacia ${target.title||target.name}. Anya la sigue por el sendero.`);return moved;}
+  throwBall(){this.stop();this.history=[];this.companion.fetch(this.player,this.facing);this.callbacks.message('¡Ahí va la pelota! Pandora corre a buscarla y te la traerá.');this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});}
+  giveTreat(){this.stop();this.history=[];this.companion.approach('treat',this.player);this.callbacks.message('¡Ven, Pandora! Anya tiene un premio para ti.');this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});}
+  cuddle(){this.stop();this.history=[];this.companion.approach('pet',this.player);this.callbacks.message('Pandora se acerca para recibir una caricia de Anya.');}
   tap(point){
+    if(distance(point,this.dog)<38){this.callbacks.pet();return;}
     const quest=ZONES.map((z,i)=>({...z,id:`station-${i}`,zone:i,title:z.name})).find(q=>distance(q,point)<65);
     if(quest){this.travelTo(quest);return;}
     if(distance(point,KITCHEN)<55){this.travelTo({...KITCHEN,title:'el horno de Alyssia'});return;}
     if(distance(point,PARTY)<80){this.travelTo({...PARTY,id:'talk',title:'Alyssia'});return;}
-    if(distance(point,this.dog)<40){this.callbacks.pet();return;}
     const treasure=TREASURES.find(t=>!this.getState().treasures.includes(t.id)&&this.revealed.has(t.id)&&distance(t,point)<45);
     this.travelTo(treasure||point);
   }
@@ -58,11 +65,11 @@ export class Garden {
     const items=[...ZONES.map((z,i)=>({...z,id:`station-${i}`,zone:i,title:z.name})),{...KITCHEN,title:'Preparar el pastel'}, {...PARTY,id:'talk',title:'Hablar con Alyssia'}];
     return items.filter(item=>distance(item,this.player)<92).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0]||null;
   }
-  interact(){const target=this.nearest();if(target)this.callbacks.interact(target);else this.sniff();}
+  interact(){const target=this.nearest();if(target)this.callbacks.interact(target);else this.callbacks.guide();}
   sniff(){
     const available=TREASURES.filter(t=>!this.getState().treasures.includes(t.id)).sort((a,b)=>distance(a,this.player)-distance(b,this.player));
     const target=available[0];if(!target){this.callbacks.message('¡Guau! Encontramos las ocho estrellas. Pandora está muy orgullosa de su equipo.');return;}
-    this.revealed.add(target.id);this.dogPath=findPath(this.dog,target,this.getState().growth);this.dogTarget=target;
+    this.revealed.add(target.id);this.companion.sniff(target);
     this.callbacks.message('¡Pandora encontró un olor curioso! Sigue sus huellitas doradas.');
   }
   advance(actor,route,dt,speed){
@@ -74,18 +81,18 @@ export class Garden {
     const dx=Number(this.keys.has('arrowright')||this.keys.has('d'))-Number(this.keys.has('arrowleft')||this.keys.has('a'));
     const dy=Number(this.keys.has('arrowdown')||this.keys.has('s'))-Number(this.keys.has('arrowup')||this.keys.has('w'));
     if(dx||dy)this.player=movePosition(this.player,dx,dy,dt,state.growth);
-    else this.advance(this.player,this.path,dt,225);
+    else if(this.companion.canFollow)this.advance(this.player,this.path,dt,225);
     const moved=distance(before,this.player)>.1;
     if(moved){this.walk+=dt*9;if(Math.abs(this.player.x-before.x)>.1)this.facing=this.player.x>before.x?1:-1;this.history.push({...this.player});if(this.history.length>80)this.history.shift();}
-    if(this.dogPath.length)this.advance(this.dog,this.dogPath,dt,220);
-    else if(!this.dogTarget||distance(this.dog,this.player)>420){this.dogTarget=null;const follow=this.history.length>12?this.history[this.history.length-12]:{x:this.player.x-45,y:this.player.y+22};if(distance(this.dog,follow)>25){const next=movePosition(this.dog,follow.x-this.dog.x,follow.y-this.dog.y,dt,0);this.dog=next;if(distance(this.dog,follow)>160&&!this.dogPath.length)this.dogPath=findPath(this.dog,follow,state.growth);}}
+    const trail=moved&&this.history.length>12?this.history[this.history.length-12]:{x:this.player.x-45,y:this.player.y+22};
+    const dogEvent=this.companion.update(dt,this.player,trail);if(dogEvent)this.callbacks.companion(dogEvent);
     this.camera.x+=(this.player.x-this.camera.x)*Math.min(1,dt*6);this.camera.y+=(this.player.y-40-this.camera.y)*Math.min(1,dt*6);
     const halfW=this.width/this.scale/2,halfH=this.height/this.scale/2;
     this.camera.x=Math.max(halfW,Math.min(WORLD_SIZE.width-halfW,this.camera.x));this.camera.y=Math.max(halfH,Math.min(WORLD_SIZE.height-halfH,this.camera.y));
-    for(const treasure of TREASURES){if(state.treasures.includes(treasure.id))continue;if(distance(treasure,this.player)<95)this.revealed.add(treasure.id);if(distance(treasure,this.player)<30){this.dogTarget=null;this.callbacks.collect(treasure);}}
+    for(const treasure of TREASURES){if(state.treasures.includes(treasure.id))continue;if(distance(treasure,this.player)<95)this.revealed.add(treasure.id);if(distance(treasure,this.player)<30){if(this.companion.job?.type==='sniff'&&this.companion.job.target.id===treasure.id)this.companion.cancel();this.callbacks.collect(treasure);}}
     if(this.target&&!this.path.length){const target=this.target;this.target=null;if(target.id&&!target.id.startsWith('spark-')&&distance(this.player,target)<100)this.callbacks.interact(target);}
     this.uiTime+=dt;this.saveTime+=dt;
-    if(this.uiTime>.25){this.uiTime=0;const zone=ZONES.map((z,i)=>({...z,i})).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0];this.callbacks.position({...this.player},zone.i,this.nearest());this.canvas.setAttribute('aria-label',`Jardín explorable. Anya en ${zone.name}. Usa flechas o WASD, toca un lugar para caminar y E para explorar.`);this.canvas.dataset.x=Math.round(this.player.x);this.canvas.dataset.y=Math.round(this.player.y);}
+    if(this.uiTime>.25){this.uiTime=0;const zone=ZONES.map((z,i)=>({...z,i})).sort((a,b)=>distance(a,this.player)-distance(b,this.player))[0];this.callbacks.position({...this.player},zone.i,this.nearest(),this.companion);this.canvas.setAttribute('aria-label',`Jardín explorable. Anya en ${zone.name}. Usa flechas o WASD, toca un lugar para caminar y E para explorar.`);this.canvas.dataset.x=Math.round(this.player.x);this.canvas.dataset.y=Math.round(this.player.y);}
     if(this.saveTime>5){this.saveTime=0;this.callbacks.save();}
   }
   paintGround(){
@@ -124,15 +131,15 @@ export class Garden {
     if(this.reduced)time=0;
     if(!this.width||!this.height)return;const c=this.ctx,state=this.getState();c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,this.width,this.height);c.fillStyle='#b8cca0';c.fillRect(0,0,this.width,this.height);c.translate(this.width/2,this.height/2);c.scale(this.scale,this.scale);c.translate(-this.camera.x,-this.camera.y);c.drawImage(this.ground,0,0);
     for(let i=0;i<3;i++){const a=time*.3+i*2;ellipse(c,330+Math.cos(a)*80,430+Math.sin(a)*45,8,3,'#dfb57899');}
-    const route=this.dogTarget?[this.dog,...this.dogPath]:[this.player,...this.path];
-    if(route.length>1){c.strokeStyle=this.dogTarget?'#d49b3dbb':'#6e8c6588';c.lineWidth=3;c.setLineDash([3,12]);c.lineCap='round';c.beginPath();route.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();c.setLineDash([]);}
+    const dogLeading=['guide','sniff'].includes(this.companion.job?.type),route=dogLeading?[this.dog,...this.companion.route]:[this.player,...this.path];
+    if(route.length>1){c.strokeStyle=dogLeading?'#d49b3dbb':'#6e8c6588';c.lineWidth=3;c.setLineDash([3,12]);c.lineCap='round';c.beginPath();route.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();c.setLineDash([]);}
     for(const z of ZONES){const done=collectedCandles(state).includes(ZONES.indexOf(z));label(c,z.name,z.x,z.y-210,{color:done?'#587c49':'#52654c'});}
-    for(const treasure of TREASURES){if(state.treasures.includes(treasure.id)||!this.revealed.has(treasure.id))continue;ellipse(c,treasure.x,treasure.y+3,20,8,'#eed19555');star(c,treasure.x,treasure.y-15+Math.sin(time*2)*4,13,'#f6d77a');if(this.dogTarget?.id===treasure.id)label(c,'Le huele a tesoro…',treasure.x,treasure.y-48,{small:true});}
+    for(const treasure of TREASURES){if(state.treasures.includes(treasure.id)||!this.revealed.has(treasure.id))continue;ellipse(c,treasure.x,treasure.y+3,20,8,'#eed19555');star(c,treasure.x,treasure.y-15+Math.sin(time*2)*4,13,'#f6d77a');if(this.companion.job?.type==='sniff'&&this.companion.job.target.id===treasure.id)label(c,'Le huele a tesoro…',treasure.x,treasure.y-48,{small:true});}
     const objects=TREES.map(tree=>({y:tree.y,draw:()=>this.drawTree(c,tree,time)}));
     objects.push({y:HOUSE.y,draw:()=>this.drawHouse(c,state,time)});
     objects.push({y:PARTY.y,draw:()=>{this.drawAvatar(c,'alyssia',PARTY,136,time);label(c,'Alyssia · tu guía',PARTY.x,PARTY.y+26,{small:true});}});
     objects.push({y:this.player.y,draw:()=>{this.drawAvatar(c,'anya',this.player,102,time,this.keys.size>0||this.path.length>0,this.facing);label(c,'Anya',this.player.x,this.player.y+20,{small:true});}});
-    objects.push({y:this.dog.y,draw:()=>{this.drawAvatar(c,'pandora',this.dog,52,time,this.dogPath.length>0||distance(this.dog,this.player)>60,this.player.x>this.dog.x?1:-1);if(state.treasures.length===8)star(c,this.dog.x,this.dog.y-59,7,'#f5cf65');}});
+    objects.push({y:this.dog.y,draw:()=>{this.drawAvatar(c,'pandora',this.dog,52,time,this.companion.walking,this.companion.facing);if(state.treasures.length===8)star(c,this.dog.x,this.dog.y-59,7,'#f5cf65');}});
     for(let i=0;i<ZONES.length;i++){
       const quest=ZONES[i],progress=stationProgress(state,i),done=progress===3,near=distance(quest,this.player)<100;
       ellipse(c,quest.x,quest.y+5,31,11,'#927a4a33');
@@ -142,6 +149,7 @@ export class Garden {
       for(let level=0;level<3;level++)ellipse(c,quest.x-14+level*14,quest.y+4,4,4,progress>level?'#638954':'#f8f1dd');
       if(near||this.target?.zone===i)label(c,progress===0?'Nivel 1 · una vela':progress===1?'Nivel 2 · ingrediente':progress===2?'Nivel 3 · regalo':'¡Los tres premios!',quest.x,quest.y-112,{small:true});
     }
+    this.drawCompanionExtras(c,objects,time);
     objects.sort((a,b)=>a.y-b.y).forEach(object=>object.draw());
     rounded(c,KITCHEN.x-30,KITCHEN.y-45,60,49,9,'#c28c63');rounded(c,KITCHEN.x-23,KITCHEN.y-27,46,25,6,'#685e49');ellipse(c,KITCHEN.x,KITCHEN.y-13,13,7,'#efb452');
     if(canFinish(state))for(let i=0;i<3;i++)star(c,KITCHEN.x+Math.sin(time+i)*28,KITCHEN.y-61-i*12,5,'#edcc70');
@@ -149,6 +157,15 @@ export class Garden {
     for(let i=0;i<8;i++){const x=1930+Math.sin(time*.35+i*5)*150,y=1130+Math.cos(time*.5+i*3)*90,wing=3+Math.abs(Math.sin(time*6+i))*6;ellipse(c,x-wing/2,y,wing,4,i%2?'#e8b2a7':'#f5d580');ellipse(c,x+wing/2,y,wing,4,i%2?'#e8b2a7':'#f5d580');}
     if(state.growth>=6){c.strokeStyle='#fff6d466';c.lineWidth=2;for(let i=0;i<12;i++){const x=(time*70+i*223)%2400,y=150+i*110;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+30,y-10,x+70,y);c.stroke();}}
     c.setTransform(this.dpr,0,0,this.dpr,0,0);this.drawMinimap(c,state);
+  }
+  drawCompanionExtras(c,objects,time){
+    const companion=this.companion,ball=companion.ball,job=companion.job;
+    if(ball){const carried=ball.phase==='carried',x=carried?this.dog.x+companion.facing*16:ball.x,y=carried?this.dog.y-17:ball.y,z=carried?0:ball.height;
+      objects.push({y:carried?this.dog.y+1:y+2,draw:()=>{if(!carried)ellipse(c,x,y+3,8,3,'#596e4233');ellipse(c,x,y-z-7,8,8,'#dc9271');c.strokeStyle='#fff0ce';c.lineWidth=2;c.beginPath();c.arc(x,y-z-7,5,-1,2);c.stroke();}});
+    }
+    if(job?.type==='treat'&&job.phase==='approach')objects.push({y:this.player.y+1,draw:()=>{const x=this.player.x+21,y=this.player.y-36;rounded(c,x-8,y-4,16,8,4,'#cbaa69');for(const dx of [-8,8])for(const dy of [-3,3])ellipse(c,x+dx,y+dy,4,4,'#dec387');}});
+    if(companion.emotion)objects.push({y:this.dog.y+2,draw:()=>{for(let i=0;i<3;i++){c.font='800 17px Nunito,sans-serif';c.fillStyle='#cc8975';c.textAlign='center';c.fillText('♥',this.dog.x-21+i*21,this.dog.y-62-(this.reduced?0:Math.sin(time*3+i)*7));}}});
+    if(job?.type==='guide')label(c,'¡Sígueme, Anya!',this.dog.x,this.dog.y-78,{small:true,color:'#94713d'});
   }
   drawHouse(c,state,time){
     const {x,y,w}=HOUSE,g=state.growth,lift=g*4,shake=g>=7&&!this.reduced?Math.sin(time*8)*1.5:0;

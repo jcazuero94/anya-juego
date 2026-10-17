@@ -44,3 +44,18 @@ En `output/qa/` (fuera de Git): `anya-v3-deseo.jpg`, `anya-v3-victoria.jpg`, `an
 ## Ajuste de altura · versión 3.0.1
 
 Alyssia se muestra más alta que Anya en portada, jardín, introducción y celebración. Revisado en 1280 × 900, 390 × 844 y 320 × 740: alrededor de 20 % de diferencia en la portada y 22 % en la celebración, sin deformar las ilustraciones ni introducir desplazamiento horizontal. La intro conserva la figura completa y los módulos pasan la comprobación de sintaxis.
+
+## Pandora, receta y puntaje · versión 3.1
+
+46 pruebas automáticas correctas. Las nuevas pruebas simulan guía hasta las ocho estaciones y el horno, retorno desde un punto lejano, vuelo/recogida/devolución de la pelota, devolución con Anya en movimiento, premio y caricia de cerca, pausa y cancelación. Se comprueban mejoras por ingrediente, receta con tres capas, rehacer un pastel al recoger otro ingrediente, puntajes mínimo y máximo, puntuación en derrota, contadores y compatibilidad con guardados anteriores de versión 3.
+
+Revisión real de interfaz:
+
+- La huella de Pandora inicia la guía: Pandora va delante, aparece un sendero dorado y Anya la sigue. Al ganar la primera vela, vuelve a guiar al nivel que entrega harina. Con la misión mínima completa, guía al horno.
+- «Jugar con Pandora» abre acciones de pelota, premio, caricia y búsqueda de estrella. Se comprobó el vuelo de la pelota y su devolución real, con mensaje y contador de una pelota devuelta. El premio requiere acercamiento y muestra corazones; la caricia también se completa con mensaje. Los juegos no suman puntos.
+- Se corrigió la superposición de la vista fija del jardín que ocultaba los botones de su pie al desplazarse. Los botones del pie y los del escenario ahora reciben sus clics por separado.
+- Pastel con tres ingredientes frente a ocho: se ven el cambio de bizcocho, tres capas, chocolate, glaseado y perlas, flores de vainilla, fresas y plato dorado. La vista previa enumera las mejoras y permite buscar otro ingrediente.
+- El final con ocho ingredientes y ocho regalos muestra 5.000 de 5.000 puntos: 800 por velas, 1.200 por ingredientes, 2.000 por regalos y 1.000 por el deseo. Incluye recuentos 8/8 y desglose; la misión mínima sin regalos vale 2.250.
+- Vistas de receta, deseo y puntaje revisadas en 1280 × 900, 390 × 844 y 320 × 740, sin desplazamiento horizontal del documento ni de sus diálogos. Sin errores de consola durante las interacciones.
+
+El panel local de pruebas añade un caso con los ocho ingredientes y ocho regalos. No se publica en `/docs`.

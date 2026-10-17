@@ -7,13 +7,13 @@ Un juego de cumpleaños creado para los ocho años de Anya. Alessandro está atr
 ## La misión
 
 - Ocho estaciones abiertas desde el principio. Cada una tiene tres niveles consecutivos: fácil → una vela, medio → un ingrediente, difícil → un regalo.
-- Para ganar bastan **ocho velas, harina, huevos y leche**: once retos. Los otros cinco ingredientes y los ocho regalos son opcionales. Cacao, azúcar, fresas y vainilla cambian detalles del pastel.
+- Para ganar bastan **ocho velas, harina, huevos y leche**: once retos. Los otros cinco ingredientes y los ocho regalos son opcionales. Cada ingrediente extra mejora el pastel: mantequilla, glaseado y perlas de azúcar, flores de vainilla, chocolate y fresas. La receta crece hasta tres capas y un plato dorado. El botón «Ver cómo va mi pastel» permite revisar las mejoras.
 - Alyssia espera en el centro, indica qué falta, recomienda el próximo objetivo necesario y hornea el pastel. Anya elige su deseo y pulsa el botón para soplar las ocho velas.
 - Una introducción animada en tres escenas explica la historia antes de iniciar el reloj. La victoria reúne a los cuatro personajes; en la derrota el tejado y las paredes se abren por el estirón.
 
 ## Explorar y aprender
 
-Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. Pandora la sigue, recibe caricias y olfatea ocho estrellas secretas para el álbum. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom.
+Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. La huella de Pandora la convierte en guía: camina delante de Anya y la lleva al siguiente objetivo necesario; al tener los materiales, la lleva al horno. En «Jugar con Pandora» Anya puede lanzarle una pelota que busca y devuelve, darle un premio, acariciarla o pedirle que olfatee una de las ocho estrellas secretas. Hay trayectorias, pelota visible, acercamiento para recibir el premio y corazones; las interacciones completadas se guardan. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom.
 
 Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, secuencias, palabras, acertijos, patrones, simetría, laberintos y decisiones de cuidado. Cada estación rota sus tres tipos entre partidas. Números, cartas, palabras, dibujos y caminos también cambian. La dificultad escala con el nivel: más parejas, secuencias y caminos más largos, palabras mayores, sumas/restas y luego grupos. Una semilla conserva los mismos retos al retomar la partida.
 
@@ -24,6 +24,17 @@ Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, sec
 Pausar, ocultar la pestaña o salir detiene el reloj. Al volver a una pestaña oculta se pide reanudar; al volver a abrir la página se conserva el tiempo restante. La intro no consume tiempo. El progreso y el tiempo se guardan en este navegador. Otra aventura reinicia los premios y da veinte minutos con nuevos retos.
 
 No hay anuncios, compras, cuentas, formularios ni rastreadores. El humor trata de un hechizo ficticio: crecer en la vida real está bien.
+
+## Puntaje de cada aventura
+
+La pantalla final muestra el puntaje y el desglose, tanto al ganar como al perder:
+
+- Cada vela: 100 puntos (hasta 800).
+- Cada ingrediente: 150 puntos (hasta 1.200), con el total recogido de ocho.
+- Cada regalo: 250 puntos (hasta 2.000), con el total recogido de ocho.
+- Pedir el deseo a tiempo: 1.000 puntos.
+
+El máximo es **5.000 puntos**. Ganar con los tres ingredientes básicos y sin regalos da 2.250. Jugar con Pandora o buscar estrellas no infla el puntaje. Los extras siguen siendo opcionales para ganar, y recogerlos mejora la receta y el resultado. Si ya se había horneado y se recoge otro ingrediente, Alyssia puede volver a hornear el pastel mejorado.
 
 ## Desarrollo y verificación
 
@@ -37,7 +48,7 @@ npm test
 
 Abrir `http://127.0.0.1:4173`. El servidor es únicamente de desarrollo. GitHub Pages sirve los archivos estáticos de `/docs`, sin backend.
 
-Las 33 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
+Las 46 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, interacción cercana, mejoras del pastel, puntos y compatibilidad de los guardados. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
 
 Para revisar los límites temporales sin esperar veinte minutos:
 
@@ -51,10 +62,11 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 
 - `docs/game.js`: historia, interfaz, reloj, premios, Alyssia, pastel, deseo, mapa y álbum.
 - `docs/logic.js`: progresión, reloj de juego, retos reproducibles y guardado validado.
+- `docs/companion.js`: guía, pelota, premios, caricias y seguimiento de Pandora.
 - `docs/world.js`, `docs/map.js`: Canvas, cámara, personajes, movimiento, colisiones y rutas.
 - `docs/puzzles.js`, `docs/questions.js`: minijuegos, pistas y bancos de lectura.
 - `docs/icons.js`: dibujos de velas, ingredientes y otros iconos.
-- `docs/styles.css`, `docs/adventure.css`, `docs/birthday.css`: diseño adaptable y animaciones con movimiento reducido.
+- `docs/styles.css`, `docs/adventure.css`, `docs/birthday.css`, `docs/playtime.css`: diseño adaptable y animaciones con movimiento reducido.
 
 ## Publicación y privacidad
 

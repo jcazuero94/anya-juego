@@ -1,4 +1,4 @@
-import { WORLD_SIZE, SPAWN } from './logic.js?v=3';
+import { WORLD_SIZE, SPAWN } from './logic.js?v=3.1';
 
 export const PARTY = { x:1200, y:820 };
 export const KITCHEN = { id:'final', x:1330, y:890 };
@@ -38,8 +38,8 @@ function nearestCell(pos,growth) {
 }
 export function safePosition(pos,growth=0) { if(!isBlocked(pos.x,pos.y,growth))return {...pos}; const id=nearestCell(pos,growth); return id===null?{...SPAWN}:point(id); }
 export function lineClear(a,b,growth=0) {
-  const steps=Math.ceil(distance(a,b)/12);
-  for(let i=1;i<=steps;i++)if(isBlocked(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,growth))return false;
+  const steps=Math.ceil(distance(a,b)/4);
+  for(let i=1;i<=steps;i++)if(isBlocked(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,growth,18))return false;
   return true;
 }
 export function findPath(start,goal,growth=0) {

@@ -1,4 +1,4 @@
-import { icon, labels } from './icons.js?v=3';
+import { icon, labels } from './icons.js?v=3.1';
 const esc=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const $=(s,root)=>root.querySelector(s);
 const $$=(s,root)=>[...root.querySelectorAll(s)];

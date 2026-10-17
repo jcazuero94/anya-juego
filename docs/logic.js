@@ -1,4 +1,4 @@
-import { WORDS, CARE, RIDDLES, CARE_MEDIUM, CARE_HARD, RIDDLES_HARD } from './questions.js?v=3';
+import { WORDS, CARE, RIDDLES, CARE_MEDIUM, CARE_HARD, RIDDLES_HARD } from './questions.js?v=3.1';
 
 export const VERSION=3;
 export const GAME_DURATION=20*60*1000;
@@ -115,7 +115,7 @@ export function generateChallenges(seed) {
   return Object.fromEntries(entries);
 }
 export function createGame(seed=Math.floor(Math.random()*0xffffffff)) {
-  return {version:VERSION,seed:seed>>>0,status:'playing',elapsedMs:0,clockStarted:false,growth:0,mistakes:0,completed:[],treasures:[],position:{...SPAWN},visited:[],pets:0,cake:'unbaked',candlesBlown:false};
+  return {version:VERSION,seed:seed>>>0,status:'playing',elapsedMs:0,clockStarted:false,growth:0,mistakes:0,completed:[],treasures:[],position:{...SPAWN},visited:[],pets:0,dogPlays:0,dogTreats:0,cake:'unbaked',candlesBlown:false};
 }
 export function stationProgress(state,zone) {return QUESTS.filter(q=>q.zone===zone&&state.completed.includes(q.id)).length;}
 export function collectedCandles(state) {return QUESTS.filter(q=>q.level===0&&state.completed.includes(q.id)).map(q=>q.zone);}
@@ -125,7 +125,7 @@ export function canFinish(state) {const ingredients=collectedIngredients(state);
 export function isUnlocked(state,zone,level=0) {return !!ZONES[zone]&&(level===0||state.completed.includes(`${ZONES[zone].id}-${level-1}`));}
 export function completeQuest(state,id) {
   const q=QUESTS.find(q=>q.id===id);
-  return !q||state.status!=='playing'||!state.clockStarted||state.elapsedMs>=GAME_DURATION||!isUnlocked(state,q.zone,q.level)||state.completed.includes(id)?state:{...state,completed:[...state.completed,id]};
+  return !q||state.status!=='playing'||!state.clockStarted||state.elapsedMs>=GAME_DURATION||!isUnlocked(state,q.zone,q.level)||state.completed.includes(id)?state:{...state,completed:[...state.completed,id],cake:q.level===1?'unbaked':state.cake};
 }
 export function makeMistake(state) {return state.status==='playing'?{...state,mistakes:state.mistakes+1}:state;}
 export function advanceTime(state,ms) {
@@ -153,7 +153,7 @@ export function readSave(raw) {
     if(QUESTS.some(q=>q.level>0&&completed.includes(q.id)&&!completed.includes(`${ZONES[q.zone].id}-${q.level-1}`)))return null;
     const base=createGame(data.seed),elapsedMs=Math.max(0,Math.min(GAME_DURATION,Number(data.elapsedMs)||0));
     const position=Number.isFinite(data.position?.x)&&Number.isFinite(data.position?.y)?{x:Math.max(60,Math.min(2340,data.position.x)),y:Math.max(60,Math.min(1540,data.position.y))}:base.position;
-    let next={...base,completed,position,elapsedMs,clockStarted:!!data.clockStarted||completed.length>0||elapsedMs>0,growth:Math.floor(elapsedMs/GROWTH_INTERVAL),treasures:[...new Set(data.treasures)],visited:[...new Set(Array.isArray(data.visited)?data.visited.filter(i=>Number.isInteger(i)&&i>=0&&i<8):[])],pets:Math.max(0,Math.min(3,Math.floor(Number(data.pets)||0))),mistakes:Math.max(0,Math.floor(Number(data.mistakes)||0))};
+    let next={...base,completed,position,elapsedMs,clockStarted:!!data.clockStarted||completed.length>0||elapsedMs>0,growth:Math.floor(elapsedMs/GROWTH_INTERVAL),treasures:[...new Set(data.treasures)],visited:[...new Set(Array.isArray(data.visited)?data.visited.filter(i=>Number.isInteger(i)&&i>=0&&i<8):[])],pets:Math.max(0,Math.min(999,Math.floor(Number(data.pets)||0))),dogPlays:Math.max(0,Math.min(999,Math.floor(Number(data.dogPlays)||0))),dogTreats:Math.max(0,Math.min(999,Math.floor(Number(data.dogTreats)||0))),mistakes:Math.max(0,Math.floor(Number(data.mistakes)||0))};
     if(canFinish(next)&&data.cake==='baked')next.cake='baked';
     if(elapsedMs>=GAME_DURATION)next.status='lost';
     else if(data.status==='won'&&data.candlesBlown&&next.cake==='baked')next=winGame(next);
@@ -167,4 +167,21 @@ export class PlayClock {
   start(){if(this.last===null)this.last=this.now();}
   tick(){if(this.last===null)return;const current=this.now(),elapsed=Math.max(0,current-this.last);this.last=current;if(elapsed)this.onElapsed(elapsed);}
   stop(){this.tick();this.last=null;}
+}
+
+export const SCORE_RULES={candle:100,ingredient:150,gift:250,wish:1000,max:5000};
+export function scoreRun(state) {
+  const candles=collectedCandles(state).length,ingredients=collectedIngredients(state).length,gifts=collectedGifts(state).length;
+  const candlePoints=candles*SCORE_RULES.candle,ingredientPoints=ingredients*SCORE_RULES.ingredient,giftPoints=gifts*SCORE_RULES.gift,wishPoints=state.status==='won'?SCORE_RULES.wish:0;
+  return {candles,ingredients,gifts,candlePoints,ingredientPoints,giftPoints,wishPoints,total:candlePoints+ingredientPoints+giftPoints+wishPoints,max:SCORE_RULES.max};
+}
+export function cakeProfile(state) {
+  const indices=state?collectedIngredients(state):[],ingredients=indices.map(i=>INGREDIENTS[i]),extras=ingredients.filter(i=>!i.required),level=extras.length;
+  const names=['Pastel de cumpleaños','Pastel con un toque mágico','Pastel especial','Pastel de fantasía','Pastel de fiesta','El gran pastel de Anya'];
+  const enhancements={butter:'Bizcocho dorado y crema de mantequilla',sugar:'Glaseado y perlas de azúcar',vanilla:'Flores y aroma de vainilla',cacao:'Capas de chocolate',berries:'Fresas frescas para decorar'};
+  return {name:names[level],count:ingredients.length,level,layers:1+Math.floor(level/2),lift:level*6,ready:INGREDIENTS.every(i=>!i.required||ingredients.some(found=>found.id===i.id)),ids:ingredients.map(i=>i.id),extras:extras.map(i=>({id:i.id,name:i.name,detail:enhancements[i.id]}))};
+}
+export function recordCompanion(state,event) {
+  if(state.status!=='playing'||!['fetch','treat','pet'].includes(event))return state;
+  const key={fetch:'dogPlays',treat:'dogTreats',pet:'pets'}[event];return {...state,[key]:Math.min(999,(state[key]||0)+1)};
 }
