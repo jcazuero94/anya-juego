@@ -59,3 +59,9 @@ Revisión real de interfaz:
 - Vistas de receta, deseo y puntaje revisadas en 1280 × 900, 390 × 844 y 320 × 740, sin desplazamiento horizontal del documento ni de sus diálogos. Sin errores de consola durante las interacciones.
 
 El panel local de pruebas añade un caso con los ocho ingredientes y ocho regalos. No se publica en `/docs`.
+
+## Acciones de Pandora a mano · versión 3.1.1
+
+La vista principal muestra una barra sobre el jardín con Acariciar, Lanzar pelota, Buscar estrella y Darle premio. Cada botón inicia su acción directamente, sin abrir ningún diálogo; la interacción al tocar a Pandora conserva su panel opcional.
+
+Comprobado en navegador a 1280 × 900, 390 × 844 y 320 × 740: caricia completada, pelota devuelta, premio entregado y búsqueda de estrella iniciada con huellas. Ninguna acción abre un submenú. Los botones miden al menos 46 px de alto en computador y 72 px en celular, no se superponen y sus etiquetas caben sin desplazamiento horizontal. Se conserva la guía de la huella y el progreso guardado de versión 3.
