@@ -65,3 +65,9 @@ El panel local de pruebas añade un caso con los ocho ingredientes y ocho regalo
 La vista principal muestra una barra sobre el jardín con Acariciar, Lanzar pelota, Buscar estrella y Darle premio. Cada botón inicia su acción directamente, sin abrir ningún diálogo; la interacción al tocar a Pandora conserva su panel opcional.
 
 Comprobado en navegador a 1280 × 900, 390 × 844 y 320 × 740: caricia completada, pelota devuelta, premio entregado y búsqueda de estrella iniciada con huellas. Ninguna acción abre un submenú. Los botones miden al menos 46 px de alto en computador y 72 px en celular, no se superponen y sus etiquetas caben sin desplazamiento horizontal. Se conserva la guía de la huella y el progreso guardado de versión 3.
+
+## Acciones dentro del jardín · versión 3.1.2
+
+La huella de guía y los cuatro botones de Pandora comparten ahora un grupo dentro del escenario. En computador aparecen junto al botón de explorar; en jardines más estrechos se colocan encima de las flechas y de explorar. Se retira la barra exterior.
+
+Revisión en navegador a 1280 × 900, 390 × 844 y 320 × 740: los cinco botones están íntegramente dentro del jardín, reciben sus clics y no se superponen entre sí ni con los controles para caminar y explorar. La huella conserva 44 × 44 px y las acciones, al menos 44 × 54 px. Comprobados lanzamiento, caricia, premio, estrella y guía al siguiente objetivo desde el nuevo grupo, sin submenús. Sin desplazamiento horizontal.
