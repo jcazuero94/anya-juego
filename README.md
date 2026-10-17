@@ -9,11 +9,11 @@ Un juego de cumpleaños creado para los ocho años de Anya. Alessandro está atr
 - Ocho estaciones abiertas desde el principio. Cada una tiene tres niveles consecutivos: fácil → una vela, medio → un ingrediente, difícil → un regalo.
 - Para ganar bastan **ocho velas, harina, huevos y leche**: once retos. Los otros cinco ingredientes y los ocho regalos son opcionales. Cada ingrediente extra mejora el pastel: mantequilla, glaseado y perlas de azúcar, flores de vainilla, chocolate y fresas. La receta crece hasta tres capas y un plato dorado. El botón «Ver cómo va mi pastel» permite revisar las mejoras.
 - Alyssia espera en el centro, indica qué falta, recomienda el próximo objetivo necesario y hornea el pastel. Anya elige su deseo y pulsa el botón para soplar las ocho velas.
-- Una introducción animada en tres escenas explica la historia antes de iniciar el reloj. La victoria reúne a los cuatro personajes; en la derrota el tejado y las paredes se abren por el estirón.
+- Una introducción animada a pantalla completa, como un libro ilustrado de tres capítulos, explica la historia antes de iniciar el reloj; al empezar se abre un telón sobre el jardín. Al ganar aparece «¡Deseo cumplido!» con globos, fuegos artificiales y confeti; en la derrota un «¡CRAC!» sacude la pantalla y el tejado y las paredes se abren por el estirón. El puntaje cuenta hacia arriba en ambos finales.
 
 ## Explorar y aprender
 
-Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. La huella de Pandora la convierte en guía: camina delante de Anya y la lleva al siguiente objetivo necesario; al tener los materiales, la lleva al horno. Los botones dentro del jardín, junto a la huella, permiten acariciar a Pandora, lanzarle una pelota que busca y devuelve, darle un premio o pedirle que olfatee una de las ocho estrellas secretas, con un solo toque. Hay trayectorias, pelota visible, acercamiento para recibir el premio y corazones; las interacciones completadas se guardan. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom.
+Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. La huella de Pandora la convierte en guía: camina delante de Anya y la lleva al siguiente objetivo necesario; al tener los materiales, la lleva al horno. Los botones dentro del jardín, junto a la huella, permiten acariciar a Pandora, lanzarle una pelota que busca y devuelve, darle un premio o pedirle que olfatee una de las ocho estrellas secretas, con un solo toque. Hay trayectorias, pelota visible, acercamiento para recibir el premio y corazones; las interacciones completadas se guardan. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom. Sobre el jardín, unas fichas muestran velas, ingredientes básicos y estirones, junto con el siguiente objetivo; cada premio nuevo salta y brilla al volver al jardín.
 
 Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, secuencias, palabras, acertijos, patrones, simetría, laberintos y decisiones de cuidado. Cada estación rota sus tres tipos entre partidas. Números, cartas, palabras, dibujos y caminos también cambian. La dificultad escala con el nivel: más parejas, secuencias y caminos más largos, palabras mayores, sumas/restas y luego grupos. Una semilla conserva los mismos retos al retomar la partida.
 
@@ -75,6 +75,7 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 - `docs/puzzles.js`, `docs/questions.js`: minijuegos, pistas y bancos de lectura.
 - `docs/icons.js`: dibujos de velas, ingredientes y otros iconos.
 - `docs/styles.css`, `docs/adventure.css`, `docs/birthday.css`, `docs/playtime.css`: diseño adaptable y animaciones con movimiento reducido.
+- `docs/storybook.css`: capa visual del cuento: tipografía legible, tarjetas, botones, intro a pantalla completa, telón de inicio, premios animados y finales (deseo cumplido o ¡CRAC!).
 
 ## Publicación y privacidad
 

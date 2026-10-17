@@ -27,6 +27,8 @@ const paths = {
   pause: '<path d="M11 7v18M21 7v18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
   sound: '<path d="M5 12h5l8-6v20l-8-6H5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M23 10c4 3 4 9 0 12m4-16c7 6 7 14 0 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
   mute: '<path d="M5 12h5l8-6v20l-8-6H5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m24 12 6 8m0-8-6 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  home: '<path d="M5 15 16 5l11 10" fill="#c7886c" stroke="#9c6a52" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 14h16v13H8Z" fill="#e6cf9e" stroke="#ad8c5c" stroke-width="1.3"/><path d="M14 27v-7h4v7" fill="#8fae86" stroke="#6c8a63" stroke-width="1.2"/><path d="M16 1v4m-3-2 3-2 3 2" stroke="#c99a4c" stroke-width="1.4" stroke-linecap="round" fill="none"/>',
+  lock: '<rect x="8" y="14" width="16" height="13" rx="3" fill="currentColor" opacity=".2" stroke="currentColor" stroke-width="1.6"/><path d="M11 14v-3a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="20.5" r="1.8" fill="currentColor"/>',
   book: '<path d="M16 8C11 4 6 5 3 6v21c4-2 9-2 13 1 4-3 9-3 13-1V6c-4-1-9-2-13 2Zm0 0v20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
 };
 export function icon(name, extra = '') { return `<svg class="symbol ${extra}" viewBox="0 0 32 32" aria-hidden="true">${paths[name] || paths.star}</svg>`; }

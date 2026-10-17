@@ -117,7 +117,7 @@
 .target-symbol .symbol{width:29px;height:29px}
 .balance-scale{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#e7ecdc;padding:24px 23px;border-radius:15px;margin-bottom:22px;font:34px Georgia,serif}
 .balance-missing{color:#b49143;font-size:27px}
-.comparator-guide{margin-bottom:17px;font-size:10px!important;text-align:center}
+.comparator-guide{margin-bottom:17px;font-size:12px!important;text-align:center}
 .symmetry-wings{display:flex;align-items:stretch;justify-content:center;gap:11px;margin:22px 0}
 .symmetry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:1;max-width:180px}
 .symmetry-cell{display:grid;place-items:center;aspect-ratio:1;border:1px solid #ccd5bb;background:#edf0e0;border-radius:6px;min-width:0}
