@@ -49,7 +49,6 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .welcome .hero-copy>:nth-child(2){animation-delay:.08s}.welcome .hero-copy>:nth-child(3){animation-delay:.2s}.welcome .hero-copy>:nth-child(4){animation-delay:.32s}.welcome .hero-copy>:nth-child(5){animation-delay:.42s}.welcome .hero-copy>:nth-child(6){animation-delay:.5s}
 .title-accent:after{transform-origin:left center;animation:underline-draw .9s .75s var(--ease-out) both}
 .hero-art .garden-bg{animation:bloom 1.1s var(--ease-out) both}
-.hero-house{animation:drop-in .9s .3s var(--pop) both}
 .birthday-hero .anya{animation:slide-from-left .9s .5s var(--ease-out) both,idle-bob 4.6s 1.6s ease-in-out infinite}
 .birthday-hero .alyssia{animation:slide-from-right .9s .65s var(--ease-out) both,idle-bob 5.2s 2s ease-in-out infinite}
 .birthday-hero .pandora{transform-origin:bottom center;animation:hop-in .8s .95s var(--pop) both,puppy-wag 2.4s 2s ease-in-out infinite}
@@ -100,10 +99,8 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .story-sky.dusk .story-sun{filter:saturate(.6);top:30%;opacity:.75}
 /* Chapter 1: the house strains as Alessandro grows. */
 
-.story-house{position:absolute;left:50%;bottom:16%;translate:-50% 0;scale:1.35;transform-origin:bottom center;z-index:2}
-.story-house .house-walls{animation:house-tremble 5s ease-in-out infinite alternate}
+.story-house{position:absolute;left:50%;bottom:4%;width:min(400px,66%);translate:-50% 0;z-index:2}
 .intro-0 .scene-speech{position:absolute;right:6%;top:9%;left:auto;max-width:170px;font-size:13px;font-weight:900;line-height:1.5;padding:13px 15px;background:#fffaf0;border:1px solid #e0d8b6;border-radius:16px 16px 4px 16px;box-shadow:0 8px 20px -12px #6b5b3a;z-index:4;rotate:5deg;transform-origin:left bottom;animation:pop-in .5s .9s var(--pop) both,wobble 3s 1.6s ease-in-out infinite}
-.story-house .house-walls{overflow:visible}
 .alarm-marks{position:absolute;left:50%;top:-6px;translate:-50% 0;display:flex;gap:150px;z-index:3}
 .alarm-marks i{font:900 30px Nunito,sans-serif;color:#cf7458;animation:alarm 1.2s ease-in-out infinite}.alarm-marks i:last-child{animation-delay:.6s}
 .story-anya,.story-pandora,.story-alyssia{position:absolute;object-fit:contain;object-position:bottom;z-index:3;pointer-events:none}
@@ -148,7 +145,6 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .garden-game{position:fixed;inset:0;z-index:1}
 .garden-stage{position:absolute;inset:0;overflow:hidden;background:#b8cca0}
 .garden-stage:before{content:'';position:absolute;inset:0;box-shadow:inset 0 -70px 80px -60px #2d493c66,inset 0 60px 70px -60px #2d493c55;pointer-events:none}
-.garden-stage.growth-hit{animation:stage-jolt .55s ease-in-out}
 #garden-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;outline:none}
 #garden-canvas:focus-visible{outline:3px solid #f7e6ac;outline-offset:-3px}
 .stage-top{position:absolute;left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:calc(100% - 150px);pointer-events:none}
@@ -167,13 +163,9 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .hud-progress:hover .hud-chip{background:#fff}
 .hud-next{margin:0;font-size:12.5px;line-height:1.45;font-weight:800;padding:6px 12px;background:#2d493cd9;color:#fff8e6;border-radius:10px;box-shadow:0 6px 14px -8px #1d3325;pointer-events:none;transition:opacity .3s}
 .hud-next:empty{display:none}
-.garden-stage:has(.growth-alert:not([hidden])) .hud-next{opacity:0}
 .just-earned{animation:earned-pop .9s var(--pop)}
 .zoom-controls{position:absolute;right:max(12px,env(safe-area-inset-right));top:110px;display:flex;gap:6px}
 .zoom-controls button{width:40px;height:40px;border:1px solid #fff;border-radius:12px;background:#fffaf0f2;color:var(--ink);font-size:22px;font-weight:800;box-shadow:0 6px 14px -8px #2d493c80}
-.growth-alert{position:absolute;left:50%;top:16px;translate:-50% 0;display:flex;gap:10px;align-items:center;width:max-content;max-width:min(430px,calc(100% - 24px));padding:12px 16px;border-radius:16px;background:#fff1d4f7;border:2px solid #e2b26a;color:#7c5a2f;font-size:13px;font-weight:700;box-shadow:0 18px 30px -16px #7c5a2f;z-index:5;pointer-events:none;animation:alert-drop .6s var(--pop) both}
-.growth-alert>.symbol{width:34px;height:34px;flex-shrink:0;animation:house-tremble .5s ease-in-out 3}
-.growth-alert b{font-weight:900;color:#a8573f}
 .stage-feed{position:absolute;left:50%;bottom:max(24px,env(safe-area-inset-bottom));translate:-50% 0;width:min(560px,calc(100% - 24px));display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
 .garden-message{margin:0;padding:10px 16px;border-radius:16px;background:#fffaf0f5;color:#4d5d48;font-size:14px;line-height:1.5;font-weight:700;text-align:center;box-shadow:0 12px 26px -14px #2d493c}
 .garden-message.fresh{animation:toast-in .4s var(--pop)}
@@ -195,7 +187,7 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .interact-button span{font-size:10px;border:1px solid #ffffff66;border-radius:5px;padding:1px 6px}
 @media(hover:none){.interact-button span{display:none}}
 @media(hover:hover) and (pointer:fine){.walk-pad{display:none}}
-@media(max-width:900px){.stage-feed{bottom:calc(152px + env(safe-area-inset-bottom))}.growth-alert{top:150px}}
+@media(max-width:900px){.stage-feed{bottom:calc(152px + env(safe-area-inset-bottom))}}
 @media(max-width:420px){.walk-pad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px}.pandora-controls button{width:54px}.zoom-controls{top:94px}.stage-top{max-width:calc(100% - 132px)}.hud-button{padding:0 12px 0 10px}}
 @media(max-width:360px){.walk-pad{grid-template-columns:repeat(3,38px);grid-template-rows:repeat(2,38px);gap:4px}.pandora-controls button{width:50px;min-height:50px;font-size:10px}.pandora-controls .symbol{width:21px;height:21px}.hud-chip{font-size:12.5px;padding:4px 9px 4px 6px}.hud-chip .symbol{width:18px;height:18px}}
 /* The menu drawer slides in from the right; on a phone it covers the screen. */
@@ -206,7 +198,6 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .menu-card{margin-top:12px;padding:16px;border:1px solid var(--card-line);border-radius:18px;background:var(--cream);box-shadow:var(--card-shadow)}
 .menu-card .sidebar-heading{font-size:14px}
 .menu-card .text-button{margin-top:10px;font-size:13px}
-.menu-card .house-watch{height:128px;margin:0 0 8px}.menu-card .house-watch .storybook-house{transform:scale(.55)}
 .menu-card .growth-track{display:flex;gap:3px}.menu-card .growth-tick{height:7px}
 .menu-note{font-size:12.5px!important;line-height:1.6!important;color:#7e806b;margin-top:10px}.menu-note b{display:block;color:#8a6d38}
 .menu-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
@@ -220,8 +211,7 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 .music-volume{grid-column:1/-1;display:flex;align-items:center;gap:12px;font-size:12px;color:#7d795f}.music-volume input{flex:1;min-width:0;min-height:30px;margin:0;accent-color:#85935e;cursor:pointer}
 .autosave-note{display:flex;align-items:center;gap:6px;margin-top:16px;font-size:11.5px;color:#849178}.autosave-note .symbol{width:14px;height:14px}
 @media(max-width:480px){#adventure-dialog.menu-dialog{border-radius:0;width:100%}}
-@keyframes stage-jolt{0%,100%{translate:0 0}20%{translate:-6px 2px}40%{translate:6px -2px}60%{translate:-4px 1px}80%{translate:3px 0}}
-@keyframes alert-drop{from{opacity:0;translate:-50% -30px}to{opacity:1;translate:-50% 0}}
+
 @keyframes urgent-pulse{50%{scale:1.06;box-shadow:0 0 0 6px #e8a48f40}}
 @keyframes paw-pulse{50%{scale:1.1}}
 @keyframes drawer-in{from{translate:100% 0}}
@@ -229,6 +219,52 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 
 .candle-slot{border-radius:8px;height:40px}
 .food-slot{border-radius:12px}
+/* ---------- Alessandro grows: his real poses inside the illustrated house ---------- */
+.growth-house{position:relative;width:100%;aspect-ratio:1;--s:calc(.84 + var(--g,1)*.02)}
+.growth-casa{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.growth-room{position:absolute;left:19%;right:19%;top:24%;bottom:15.5%}
+.growth-room .pose{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;transform-origin:bottom center;scale:var(--s)}
+.growth-house.animate{animation:house-tremble .5s 1.15s ease-in-out 2}
+.growth-house.animate .pose.before{animation:pose-out .45s 1.15s ease-in both}
+.growth-house.animate .pose.after{animation:pose-in .7s 1.35s var(--pop) both,pose-breathe 2.4s 2.3s ease-in-out infinite}
+.growth-sparks{position:absolute;left:50%;top:40%;width:0;height:0}
+.growth-sparks i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:#f3c766;box-shadow:0 0 8px #ffe2a0;rotate:var(--a);opacity:0;animation:growth-spark 1s 1.35s var(--ease-out) both}
+.growth-sparks i:nth-child(3n){background:#fffaf0}
+.growth-dust{position:absolute;left:0;right:0;top:9%;height:0}
+.growth-dust i{position:absolute;top:0;width:22%;aspect-ratio:1.6;border-radius:50%;background:radial-gradient(circle,#fffaf0 0 35%,#fffaf000 70%);opacity:0;animation:dust-puff 1.1s 1.3s ease-out both}
+.growth-dust i:nth-child(1){left:18%}.growth-dust i:nth-child(2){left:39%;animation-delay:1.4s}.growth-dust i:nth-child(3){left:60%;animation-delay:1.35s}
+.menu-house{max-width:250px;margin:0 auto 6px}
+.hero-casa{position:absolute;left:30%;top:1%;width:33%;z-index:1;animation:drop-in .9s .3s var(--pop) both}
+
+/* Scenes that stop the clock: Alessandro's stretch and Pandora's party. */
+#adventure-dialog.cutscene-dialog{max-width:min(520px,calc(100% - 24px));padding:0 0 28px;text-align:center;overflow:hidden auto}
+#adventure-dialog.cutscene-dialog>:not(.cutscene-stage){margin-left:28px;margin-right:28px}
+#adventure-dialog.cutscene-dialog h2{margin:8px auto 10px}
+#adventure-dialog.cutscene-dialog .button{width:calc(100% - 56px);margin-top:20px}
+.cutscene-stage{position:relative;height:min(330px,42svh);overflow:hidden;border-radius:26px 26px 0 0;margin-bottom:20px}
+.cutscene-stage>.growth-house{position:absolute;left:50%;bottom:-3%;height:100%;width:auto;translate:-50% 0}
+.growth-meter{display:flex;gap:4px;max-width:300px;margin:16px auto 0}
+.growth-meter i{flex:1;height:8px;border-radius:9px;background:#e2e5d6}
+.growth-meter .filled{background:#d5a055}.growth-meter .new{background:#bd654f;transform-origin:left center;animation:tick-fill .6s 1.6s var(--pop) both}
+.stars-stage .star-orbit{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;animation:spin 12s linear infinite}
+.star-orbit i{position:absolute;left:-17px;top:-17px;width:34px;height:34px;rotate:calc(var(--i)*45deg);transform:translateY(calc(-1*var(--r,118px)));animation:star-pop .5s calc(.3s + var(--i)*.12s) var(--pop) both}
+.star-orbit .symbol{width:34px;height:34px;filter:drop-shadow(0 0 6px #ffe2a0);animation:twinkle 1.8s calc(var(--i)*.22s) ease-in-out infinite}
+.pandora-party{position:absolute;left:31%;bottom:7%;width:38%;height:56%;z-index:2;animation:pandora-zoomies 5s ease-in-out infinite}
+.pandora-happy{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom;transform-origin:50% 65%;animation:pandora-twirl 5s ease-in-out infinite}
+.pandora-hearts i{position:absolute;left:calc(22% + var(--i)*13%);bottom:55%;font-style:normal;font-size:22px;color:#d9826c;opacity:0;animation:heart-float 2.6s calc(.8s + var(--i)*.5s) ease-out infinite}
+.woof-bubble{position:absolute;right:8%;top:12%;z-index:3;padding:9px 14px;border-radius:16px 16px 16px 4px;background:#fffaf0;border:1px solid #e0d8b6;font-size:15px;font-weight:900;color:#9a7c42;box-shadow:0 8px 18px -12px #6b5b3a;transform-origin:left bottom;animation:pop-in .5s .7s var(--pop) both,wobble 2.2s 1.4s ease-in-out infinite}
+@keyframes drop-in{0%{opacity:0;translate:0 -70px}60%{opacity:1;translate:0 8px}100%{translate:0 0}}
+@keyframes pose-out{0%{opacity:1;scale:var(--s)}70%{opacity:1;scale:calc(var(--s)*.94) calc(var(--s)*1.14)}100%{opacity:0;scale:calc(var(--s)*.9) calc(var(--s)*1.2)}}
+@keyframes pose-in{0%{opacity:0;scale:calc(var(--s)*1.1) calc(var(--s)*.8)}55%{opacity:1;scale:calc(var(--s)*.95) calc(var(--s)*1.08)}100%{opacity:1;scale:var(--s)}}
+@keyframes pose-breathe{50%{scale:calc(var(--s)*1.01) calc(var(--s)*1.025)}}
+@keyframes growth-spark{0%{opacity:0;transform:translateY(0) scale(1)}10%{opacity:1}100%{opacity:0;transform:translateY(-120px) scale(.4)}}
+@keyframes dust-puff{0%{opacity:0;scale:.3;translate:0 0}35%{opacity:.95}100%{opacity:0;scale:1.7;translate:0 -24px}}
+@keyframes tick-fill{from{scale:0 1}}
+@keyframes star-pop{from{opacity:0;scale:0}to{opacity:1;scale:1}}
+@keyframes pandora-zoomies{0%,100%{translate:-70px 0;scale:1 1}12%{translate:-35px -38px}24%{translate:0 0}36%{translate:35px -38px}48%{translate:70px 0;scale:1 1}52%{translate:70px 0;scale:-1 1}64%{translate:35px -38px;scale:-1 1}76%{translate:0 0;scale:-1 1}88%{translate:-35px -38px;scale:-1 1}97%{translate:-70px 0;scale:-1 1}}
+@keyframes pandora-twirl{0%,20%,30%,70%,80%,100%{rotate:0deg}25%{rotate:360deg}75%{rotate:-360deg}}
+@keyframes heart-float{0%{opacity:0;translate:0 0;scale:.6}20%{opacity:1}100%{opacity:0;translate:10px -90px;scale:1.3}}
+
 /* ---------- Rewards ---------- */
 
 #adventure-dialog.reward-dialog{text-align:center}
@@ -312,7 +348,7 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 @keyframes book-open{from{opacity:0;scale:.92;rotate:-1.5deg}}
 @keyframes bloom{from{opacity:0;scale:.9}}
 @keyframes underline-draw{from{scale:0 1}}
-@keyframes drop-in{0%{opacity:0;translate:0 -70px}60%{opacity:1;translate:0 8px}100%{translate:0 0}}
+
 @keyframes slide-from-left{from{opacity:0;translate:-70px 0}to{opacity:1;translate:0 0}}
 @keyframes slide-from-right{from{opacity:0;translate:70px 0}to{opacity:1;translate:0 0}}
 @keyframes walk-in{from{opacity:0;translate:-160% 0}to{opacity:1;translate:0 0}}
@@ -364,7 +400,7 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
 
 @media(max-width:1100px){
  .story-copy{padding:40px 36px 34px}
- .story-house{scale:1.1}}
+}
 @media(max-width:760px){
  #adventure-dialog.story-dialog{max-height:calc(100svh - 20px);max-width:calc(100% - 20px)}
  .story-book{grid-template-columns:1fr;min-height:0}
@@ -375,9 +411,10 @@ dialog[open]::backdrop{animation:fade-in .3s ease both;background:radial-gradien
  .story-copy .button{margin-top:20px}
  .intro-dots{margin-top:18px}
  .intro-rules{padding:11px 13px;margin-top:14px}.intro-rules p{font-size:12px}
- .story-house{scale:.82;bottom:10%}
+ .story-house{width:min(260px,60%);bottom:3%}
  .intro-0 .scene-speech{max-width:130px;font-size:11px;padding:10px 11px;right:4%;top:6%}
  .story-cake{scale:.6}
+ .star-orbit i{--r:96px}.woof-bubble{font-size:13px;right:4%}.cutscene-stage{height:min(280px,38svh)}
  .story-ingredients{right:4%;top:24%;gap:7px}.story-ingredients span{width:44px;height:44px}.story-ingredients .symbol{width:26px;height:26px}
  .story-prizes{gap:6px;right:3%}.story-prizes>span{font-size:12px;padding:6px 10px 6px 8px}.story-prizes .symbol{width:22px;height:22px}
  .story-trail{height:56%}

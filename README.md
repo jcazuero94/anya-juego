@@ -19,9 +19,9 @@ Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, sec
 
 ## Tiempo y descansos
 
-**Veinte minutos de juego activo. Alessandro crece cada dos minutos.** El reloj continúa en retos, mapa, ayuda, álbum y durante la preparación del pastel. Llegar a 20:00 sin soplar provoca la derrota, incluso con todos los materiales. Los errores y las pistas no añaden estirones ni descuentan tiempo adicional.
+**Diez minutos de juego activo. Alessandro crece cada minuto.** Cada estirón muestra una escena: Alessandro pasa de una pose a la siguiente dentro de la casa, cada vez más apretado, hasta hacerse una bolita. Si el estirón llega durante un minijuego, el mapa o el menú, la escena aparece al volver al jardín. Al encontrar las ocho estrellas secretas, Pandora celebra con una fiesta: salta, da vueltas y corre entre sus estrellas. Estas dos escenas detienen el reloj mientras se ven. El reloj continúa en retos, mapa, ayuda, álbum y durante la preparación del pastel. Llegar a 10:00 sin soplar provoca la derrota, incluso con todos los materiales. Los errores y las pistas no añaden estirones ni descuentan tiempo adicional.
 
-Pausar, ocultar la pestaña o salir detiene el reloj. Al volver a una pestaña oculta se pide reanudar; al volver a abrir la página se conserva el tiempo restante. La intro no consume tiempo. El progreso y el tiempo se guardan en este navegador. Otra aventura reinicia los premios y da veinte minutos con nuevos retos.
+Pausar, ocultar la pestaña o salir detiene el reloj. Al volver a una pestaña oculta se pide reanudar; al volver a abrir la página se conserva el tiempo restante. La intro no consume tiempo. El progreso y el tiempo se guardan en este navegador. Otra aventura reinicia los premios y da diez minutos con nuevos retos.
 
 No hay anuncios, compras, cuentas, formularios ni rastreadores. El humor trata de un hechizo ficticio: crecer en la vida real está bien.
 
@@ -56,13 +56,13 @@ Abrir `http://127.0.0.1:4173`. El servidor es únicamente de desarrollo. GitHub 
 
 Las 54 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, mejoras del pastel, puntos y compatibilidad de los guardados. También verifican la lista musical, reanudación, silencio, volumen, recuperación de bloqueos, errores y preferencias. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
 
-Para revisar los límites temporales sin esperar veinte minutos:
+Para revisar los límites temporales sin esperar diez minutos:
 
 ```sh
 npm run start:qa
 ```
 
-Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próximas al primer estirón o la derrota. Solo se sirve con `--qa`; **no existe en el sitio público**, y sustituye la partida de prueba local.
+Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próximas al primer estirón, a la derrota o a la octava estrella de Pandora. Solo se sirve con `--qa`; **no existe en el sitio público**, y sustituye la partida de prueba local.
 
 ## Código y recursos
 
@@ -79,8 +79,8 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 
 ## Publicación y privacidad
 
-GitHub Pages publica `main`, carpeta `/docs`. No hay compilación, dependencias de producción, claves ni llamadas a servicios externos durante el juego. Los datos se guardan en el navegador; si se bloquea el almacenamiento se puede jugar sin retomar después. La versión 3 inicia una misión nueva y conserva el contador de victorias anterior.
+GitHub Pages publica `main`, carpeta `/docs`. No hay compilación, dependencias de producción, claves ni llamadas a servicios externos durante el juego. Los datos se guardan en el navegador; si se bloquea el almacenamiento se puede jugar sin retomar después. La versión 4 (diez minutos) inicia una misión nueva y conserva el contador de victorias anterior.
 
-Las fotos de referencia permanecen en `Fotos/`, excluida de Git. Solo se publican las cuatro ilustraciones creadas para este regalo. Los prompts están en [design/characters.md](design/characters.md). Nunito se distribuye con su [licencia SIL Open Font License](docs/assets/fonts/OFL.txt).
+Las fotos de referencia permanecen en `Fotos/`, excluida de Git. Solo se publican las cuatro ilustraciones creadas para este regalo y las escenas del estirón: la casa y las veinte poses de Alessandro, convertidas a WebP de 640 px en `docs/assets/animations/alessandro/` (unos 1,3 MB en total). Los PNG originales generados con ChatGPT permanecen en `animaciones/`, excluida de Git. Los prompts están en [design/characters.md](design/characters.md). Nunito se distribuye con su [licencia SIL Open Font License](docs/assets/fonts/OFL.txt).
 
 Los originales de las canciones permanecen en `musica/`, excluida de Git. Las copias publicadas son MP3 estéreo de 128 kbit/s, sin carátulas ni metadatos extra y con sonoridad equilibrada entre canciones. Su duración se conserva: 2:27, 2:21 y 3:10, respectivamente.

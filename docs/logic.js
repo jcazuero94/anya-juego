@@ -1,8 +1,8 @@
 import { WORDS, CARE, RIDDLES, CARE_MEDIUM, CARE_HARD, RIDDLES_HARD } from './questions.js?v=3.1';
 
-export const VERSION=3;
-export const GAME_DURATION=20*60*1000;
-export const GROWTH_INTERVAL=2*60*1000;
+export const VERSION=4;
+export const GAME_DURATION=10*60*1000;
+export const GROWTH_INTERVAL=60*1000;
 export const MAX_GROWTH=10;
 export const WORLD_SIZE={width:2400,height:1600};
 export const SPAWN={x:1060,y:1000};
@@ -41,15 +41,15 @@ export const TREASURES=[
 ];
 export const GROWTH_MESSAGES=[
   'Alessandro espera dentro de casa. ¡Hay un deseo que preparar!',
-  '¡Primer estirón! Sus zapatillas ya asoman bajo la mesa.',
-  'Ahora alcanza el estante de las galletas sin ponerse de puntillas.',
-  '¡La lámpara le hace cosquillas en el pelo!',
-  'Alessandro se agacha para mirar por la ventana.',
-  'La casa empieza a crujir. ¡Ya pasó la mitad del tiempo!',
-  '¡El sombrero de Alessandro roza el techo!',
-  'Las ventanas tiemblan con otro estirón.',
-  'El tejado se está levantando. ¡Quedan cuatro minutos!',
-  '¡Últimos dos minutos! Alyssia espera junto al horno.',
+  '¡Primer estirón! Alessandro se mide y ya llega a las vigas.',
+  '¡Cuidado con la cabeza! El techo le roza el pelo.',
+  'Se le encogen los hombros y tiene que doblar las rodillas.',
+  'Alessandro se agacha: ¡los codos ya no caben!',
+  'Ahora va en cuclillas. ¡Ya pasó la mitad del tiempo!',
+  'Tiene que sentarse con las rodillas en el pecho.',
+  'Se hace un ovillo y abraza sus piernas.',
+  'Todo apretadito, como una bolita. ¡Quedan dos minutos!',
+  '¡Ni un centímetro más! Último minuto: Alyssia espera junto al horno.',
   '¡CRAC! Alessandro creció tanto que la casa se abrió como una caja.'
 ];
 export function rng(seed) {

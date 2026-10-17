@@ -6,7 +6,7 @@ const active=seed=>({...createGame(seed),clockStarted:true});
 function minimumMission(seed=1){let s=active(seed);for(const q of QUESTS.filter(q=>q.level===0))s=completeQuest(s,q.id);for(const q of QUESTS.filter(q=>q.level===1&&ZONES[q.zone].ingredient<3))s=completeQuest(s,q.id);return s;}
 
 test('ocho estaciones con tres niveles y ocho ingredientes, tres de ellos necesarios',()=>{
-  assert.equal(VERSION,3);assert.equal(ZONES.length,8);assert.equal(QUESTS.length,24);assert.equal(TREASURES.length,8);assert.equal(INGREDIENTS.length,8);
+  assert.equal(VERSION,4);assert.equal(GAME_DURATION,600000);assert.equal(GROWTH_INTERVAL,60000);assert.equal(ZONES.length,8);assert.equal(QUESTS.length,24);assert.equal(TREASURES.length,8);assert.equal(INGREDIENTS.length,8);
   assert.deepEqual(INGREDIENTS.filter(i=>i.required).map(i=>i.id),['flour','eggs','milk']);assert.equal(new Set(ZONES.map(z=>z.ingredient)).size,8);
   assert.equal(new Set(QUESTS.map(q=>q.id)).size,24);for(let i=0;i<8;i++)assert.deepEqual(QUESTS.filter(q=>q.zone===i).map(q=>q.level),[0,1,2]);
 });
@@ -60,7 +60,7 @@ test('el reloj cuenta tiempo real entre fotogramas; pausa y reanuda sin sumar el
   now=3100;clock.stop();assert.equal(s.elapsedMs,3000);now=300000;clock.tick();assert.equal(s.elapsedMs,3000);
   clock.start();now+=250;clock.tick();assert.equal(s.elapsedMs,3250);now+=GROWTH_INTERVAL;clock.stop();assert.equal(s.growth,1);
 });
-test('el formato del reloj redondea hacia arriba y no muestra valores negativos',()=>{assert.equal(formatTime(GAME_DURATION),'20:00');assert.equal(formatTime(60001),'01:01');assert.equal(formatTime(1),'00:01');assert.equal(formatTime(-500),'00:00');});
+test('el formato del reloj redondea hacia arriba y no muestra valores negativos',()=>{assert.equal(formatTime(GAME_DURATION),'10:00');assert.equal(formatTime(60001),'01:01');assert.equal(formatTime(1),'00:01');assert.equal(formatTime(-500),'00:00');});
 test('la misma semilla conserva los retos y cada partida tiene 24 retos',()=>{
   const a=generateChallenges(58),b=generateChallenges(58);assert.deepEqual(a,b);assert.notDeepEqual(a,generateChallenges(59));assert.equal(Object.keys(a).length,24);
   for(const q of QUESTS){assert.equal(a[q.id].level,q.level+1);assert.ok(a[q.id].hint);assert.ok(a[q.id].explanation);assert.ok(a[q.id].title);}

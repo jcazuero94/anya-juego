@@ -1,7 +1,7 @@
-import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.4';
-import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.4';
+import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.5';
+import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.5';
 
-import { Companion } from './companion.js?v=3.4';
+import { Companion } from './companion.js?v=3.5';
 
 const TAU=Math.PI*2;
 function ellipse(ctx,x,y,rx,ry,fill) { ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=fill;ctx.fill(); }

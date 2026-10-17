@@ -7,3 +7,5 @@ playwright-report/
 output/
 *.log
 .env*
+animaciones/
+docs/assets/animations/**/*.png
