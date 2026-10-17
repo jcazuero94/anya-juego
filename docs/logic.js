@@ -115,7 +115,7 @@ export function generateChallenges(seed) {
   return Object.fromEntries(entries);
 }
 export function createGame(seed=Math.floor(Math.random()*0xffffffff)) {
-  return {version:VERSION,seed:seed>>>0,status:'playing',elapsedMs:0,clockStarted:false,growth:0,mistakes:0,completed:[],treasures:[],position:{...SPAWN},visited:[],pets:0,dogPlays:0,dogTreats:0,cake:'unbaked',candlesBlown:false};
+  return {version:VERSION,seed:seed>>>0,status:'playing',elapsedMs:0,clockStarted:false,growth:0,mistakes:0,completed:[],treasures:[],position:{...SPAWN},visited:[],cake:'unbaked',candlesBlown:false};
 }
 export function stationProgress(state,zone) {return QUESTS.filter(q=>q.zone===zone&&state.completed.includes(q.id)).length;}
 export function collectedCandles(state) {return QUESTS.filter(q=>q.level===0&&state.completed.includes(q.id)).map(q=>q.zone);}
@@ -153,7 +153,7 @@ export function readSave(raw) {
     if(QUESTS.some(q=>q.level>0&&completed.includes(q.id)&&!completed.includes(`${ZONES[q.zone].id}-${q.level-1}`)))return null;
     const base=createGame(data.seed),elapsedMs=Math.max(0,Math.min(GAME_DURATION,Number(data.elapsedMs)||0));
     const position=Number.isFinite(data.position?.x)&&Number.isFinite(data.position?.y)?{x:Math.max(60,Math.min(2340,data.position.x)),y:Math.max(60,Math.min(1540,data.position.y))}:base.position;
-    let next={...base,completed,position,elapsedMs,clockStarted:!!data.clockStarted||completed.length>0||elapsedMs>0,growth:Math.floor(elapsedMs/GROWTH_INTERVAL),treasures:[...new Set(data.treasures)],visited:[...new Set(Array.isArray(data.visited)?data.visited.filter(i=>Number.isInteger(i)&&i>=0&&i<8):[])],pets:Math.max(0,Math.min(999,Math.floor(Number(data.pets)||0))),dogPlays:Math.max(0,Math.min(999,Math.floor(Number(data.dogPlays)||0))),dogTreats:Math.max(0,Math.min(999,Math.floor(Number(data.dogTreats)||0))),mistakes:Math.max(0,Math.floor(Number(data.mistakes)||0))};
+    let next={...base,completed,position,elapsedMs,clockStarted:!!data.clockStarted||completed.length>0||elapsedMs>0,growth:Math.floor(elapsedMs/GROWTH_INTERVAL),treasures:[...new Set(data.treasures)],visited:[...new Set(Array.isArray(data.visited)?data.visited.filter(i=>Number.isInteger(i)&&i>=0&&i<8):[])],mistakes:Math.max(0,Math.floor(Number(data.mistakes)||0))};
     if(canFinish(next)&&data.cake==='baked')next.cake='baked';
     if(elapsedMs>=GAME_DURATION)next.status='lost';
     else if(data.status==='won'&&data.candlesBlown&&next.cake==='baked')next=winGame(next);
@@ -180,8 +180,4 @@ export function cakeProfile(state) {
   const names=['Pastel de cumpleaños','Pastel con un toque mágico','Pastel especial','Pastel de fantasía','Pastel de fiesta','El gran pastel de Anya'];
   const enhancements={butter:'Bizcocho dorado y crema de mantequilla',sugar:'Glaseado y perlas de azúcar',vanilla:'Flores y aroma de vainilla',cacao:'Capas de chocolate',berries:'Fresas frescas para decorar'};
   return {name:names[level],count:ingredients.length,level,layers:1+Math.floor(level/2),lift:level*6,ready:INGREDIENTS.every(i=>!i.required||ingredients.some(found=>found.id===i.id)),ids:ingredients.map(i=>i.id),extras:extras.map(i=>({id:i.id,name:i.name,detail:enhancements[i.id]}))};
-}
-export function recordCompanion(state,event) {
-  if(state.status!=='playing'||!['fetch','treat','pet'].includes(event))return state;
-  const key={fetch:'dogPlays',treat:'dogTreats',pet:'pets'}[event];return {...state,[key]:Math.min(999,(state[key]||0)+1)};
 }

@@ -13,7 +13,7 @@ Un juego de cumpleaños creado para los ocho años de Anya. Alessandro está atr
 
 ## Explorar y aprender
 
-Anya camina por un jardín de 2400 × 1600 con senderos, árboles, estanque, huerto, mariposas y observatorio. La huella de Pandora la convierte en guía: camina delante de Anya y la lleva al siguiente objetivo necesario; al tener los materiales, la lleva al horno. Los botones dentro del jardín, junto a la huella, permiten acariciar a Pandora, lanzarle una pelota que busca y devuelve, darle un premio o pedirle que olfatee una de las ocho estrellas secretas, con un solo toque. Hay trayectorias, pelota visible, acercamiento para recibir el premio y corazones; las interacciones completadas se guardan. Se camina con flechas, WASD, botones táctiles o tocando el suelo. El mapa permite elegir estación y premio; las rutas rodean obstáculos. Incluye minimapa y zoom. Sobre el jardín, unas fichas muestran velas, ingredientes básicos y estirones, junto con el siguiente objetivo; cada premio nuevo salta y brilla al volver al jardín.
+Al empezar, el jardín de 2400 × 1600 ocupa toda la pantalla, también en el celular: senderos, árboles, estanque, huerto, mariposas y observatorio. Arriba quedan el botón «Menú», el reloj, la pausa y unas fichas con velas, ingredientes básicos y estirones, junto con el siguiente objetivo; cada premio nuevo salta al volver al jardín. Abajo están las flechas para caminar (en pantallas táctiles), los botones de Pandora y «Explorar». El menú reúne las velas e ingredientes, la casa de Alessandro, el mapa, el álbum, la ayuda y la música. «Guíame» (o tocar a Pandora) hace que camine delante de Anya hasta el siguiente objetivo necesario; con los materiales listos, la lleva al horno. «Pelota» lanza una pelota que Pandora busca y devuelve, y «Estrella» la pone a olfatear una de las ocho estrellas secretas. Se camina con flechas, WASD, los botones táctiles o tocando el suelo. El minimapa y el mapa permiten elegir estación; las rutas rodean obstáculos.
 
 Doce minijuegos: cuentas, ordenar números, balanzas, observación, parejas, secuencias, palabras, acertijos, patrones, simetría, laberintos y decisiones de cuidado. Cada estación rota sus tres tipos entre partidas. Números, cartas, palabras, dibujos y caminos también cambian. La dificultad escala con el nivel: más parejas, secuencias y caminos más largos, palabras mayores, sumas/restas y luego grupos. Una semilla conserva los mismos retos al retomar la partida.
 
@@ -27,7 +27,7 @@ No hay anuncios, compras, cuentas, formularios ni rastreadores. El humor trata d
 
 ## Las canciones de Pandora
 
-«Pandora tiene hambre», «Sácame ya» y «Panties» acompañan la partida en ese orden y vuelven a empezar al terminar la tercera. La música comienza al iniciar o continuar el juego, con volumen inicial del 30 %. El altavoz permite silenciar música y efectos; bajo el jardín están el cambio de canción y el volumen. El navegador recuerda estas preferencias.
+«Pandora tiene hambre», «Sácame ya» y «Panties» acompañan la partida en ese orden y vuelven a empezar al terminar la tercera. La música comienza al iniciar o continuar el juego, con volumen inicial del 30 %. En el menú están el altavoz para silenciar música y efectos, el cambio de canción y el volumen. El navegador recuerda estas preferencias.
 
 La música sigue durante los retos y los diálogos. Al pausar, ocultar la pestaña, salir o terminar la partida se detiene; al reanudar sigue desde el mismo punto. La portada y la introducción permanecen en silencio. Los archivos solo se cargan al jugar y se sirven desde GitHub Pages. Si una canción falla se intenta la siguiente; un fallo de audio no impide jugar.
 
@@ -54,7 +54,7 @@ npm test
 
 Abrir `http://127.0.0.1:4173`. El servidor es únicamente de desarrollo. GitHub Pages sirve los archivos estáticos de `/docs`, sin backend.
 
-Las 55 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, interacción cercana, mejoras del pastel, puntos y compatibilidad de los guardados. También verifican la lista musical, reanudación, silencio, volumen, recuperación de bloqueos, errores y preferencias. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
+Las 54 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, mejoras del pastel, puntos y compatibilidad de los guardados. También verifican la lista musical, reanudación, silencio, volumen, recuperación de bloqueos, errores y preferencias. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
 
 Para revisar los límites temporales sin esperar veinte minutos:
 
@@ -66,9 +66,9 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 
 ## Código y recursos
 
-- `docs/game.js`: historia, interfaz, reloj, premios, Alyssia, pastel, deseo, mapa y álbum.
+- `docs/game.js`: historia, interfaz, menú, reloj, premios, Alyssia, pastel, deseo, mapa y álbum.
 - `docs/logic.js`: progresión, reloj de juego, retos reproducibles y guardado validado.
-- `docs/companion.js`: guía, pelota, premios, caricias y seguimiento de Pandora.
+- `docs/companion.js`: guía, pelota, olfato y seguimiento de Pandora.
 - `docs/music.js`: lista de canciones, reproducción, volumen, pausas y preferencias de audio.
 - `docs/assets/music/`: las tres canciones familiares, preparadas para reproducción web.
 - `docs/world.js`, `docs/map.js`: Canvas, cámara, personajes, movimiento, colisiones y rutas.

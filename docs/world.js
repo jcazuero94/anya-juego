@@ -1,7 +1,7 @@
-import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.1';
-import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.1';
+import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.4';
+import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.4';
 
-import { Companion } from './companion.js?v=3.1';
+import { Companion } from './companion.js?v=3.4';
 
 const TAU=Math.PI*2;
 function ellipse(ctx,x,y,rx,ry,fill) { ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=fill;ctx.fill(); }
@@ -25,7 +25,7 @@ export class Garden {
     };
     this.keyup=e=>this.keys.delete(e.key.toLowerCase());this.blur=()=>this.keys.clear();
     window.addEventListener('keydown',this.keydown);window.addEventListener('keyup',this.keyup);window.addEventListener('blur',this.blur);
-    this.pointer=e=>{if(this.paused())return;const box=canvas.getBoundingClientRect(),sx=e.clientX-box.left,sy=e.clientY-box.top;if(sx>this.width-146&&sx<this.width-14&&sy>14&&sy<102){this.travelTo({x:(sx-this.width+138)/116*2400,y:(sy-21)/74*1600});}else{this.tap({x:(sx-this.width/2)/this.scale+this.camera.x,y:(sy-this.height/2)/this.scale+this.camera.y});}canvas.focus({preventScroll:true});};
+    this.pointer=e=>{if(this.paused())return;const box=canvas.getBoundingClientRect(),sx=e.clientX-box.left,sy=e.clientY-box.top;const map=this.minimapBox();if(sx>map.x&&sx<map.x+map.width&&sy>map.y&&sy<map.y+map.height){this.travelTo({x:(sx-map.x-8)/(map.width-16)*2400,y:(sy-map.y-7)/(map.height-14)*1600});}else{this.tap({x:(sx-this.width/2)/this.scale+this.camera.x,y:(sy-this.height/2)/this.scale+this.camera.y});}canvas.focus({preventScroll:true});};
     canvas.addEventListener('pointerup',this.pointer);
     this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(canvas);this.resize();
     this.tick=t=>{if(this.destroyed)return;const dt=Math.min(.04,(t-this.last)/1000||.016);this.last=t;if(!this.paused())this.update(dt,t/1000);this.draw(t/1000);this.frame=requestAnimationFrame(this.tick);};
@@ -44,15 +44,12 @@ export class Garden {
     const approach=station?[[70,25],[-70,25],[0,85],[70,-25],[-70,-25],[0,-85]].map(([dx,dy])=>({x:target.x+dx,y:target.y+dy})).find(p=>!isBlocked(p.x,p.y,growth)):null;
     const route=findPath(this.player,approach||target,growth);
     if(!route.length){this.callbacks.message('Pandora busca otra ruta. Toca un claro cercano.');return false;}
-    this.path=route;this.target=target;this.keys.clear();if(guided)this.companion.lead(route,this.player);this.callbacks.message(`Vamos hacia ${target.title||target.name||'ese rincón'}. Puedes cambiar de camino cuando quieras.`);
-    const box=this.canvas.getBoundingClientRect();if(box.top<0||box.bottom>window.innerHeight)this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});return true;
+    this.path=route;this.target=target;this.keys.clear();if(guided)this.companion.lead(route,this.player);this.callbacks.message(`Vamos hacia ${target.title||target.name||'ese rincón'}. Puedes cambiar de camino cuando quieras.`);return true;
   }
   guideTo(target){const moved=this.travelTo(target,{guided:true});if(moved)this.callbacks.message(`¡Guau! Pandora te guía hacia ${target.title||target.name}. Anya la sigue por el sendero.`);return moved;}
-  throwBall(){this.stop();this.history=[];this.companion.fetch(this.player,this.facing);this.callbacks.message('¡Ahí va la pelota! Pandora corre a buscarla y te la traerá.');this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});}
-  giveTreat(){this.stop();this.history=[];this.companion.approach('treat',this.player);this.callbacks.message('¡Ven, Pandora! Anya tiene un premio para ti.');this.canvas.scrollIntoView({block:'center',behavior:this.reduced?'instant':'smooth'});}
-  cuddle(){this.stop();this.history=[];this.companion.approach('pet',this.player);this.callbacks.message('Pandora se acerca para recibir una caricia de Anya.');}
+  throwBall(){this.stop();this.history=[];this.companion.fetch(this.player,this.facing);this.callbacks.message('¡Ahí va la pelota! Pandora corre a buscarla y te la traerá.');}
   tap(point){
-    if(distance(point,this.dog)<38){this.callbacks.pet();return;}
+    if(distance(point,this.dog)<38){this.callbacks.guide();return;}
     const quest=ZONES.map((z,i)=>({...z,id:`station-${i}`,zone:i,title:z.name})).find(q=>distance(q,point)<65);
     if(quest){this.travelTo(quest);return;}
     if(distance(point,KITCHEN)<55){this.travelTo({...KITCHEN,title:'el horno de Alyssia'});return;}
@@ -163,7 +160,6 @@ export class Garden {
     if(ball){const carried=ball.phase==='carried',x=carried?this.dog.x+companion.facing*16:ball.x,y=carried?this.dog.y-17:ball.y,z=carried?0:ball.height;
       objects.push({y:carried?this.dog.y+1:y+2,draw:()=>{if(!carried)ellipse(c,x,y+3,8,3,'#596e4233');ellipse(c,x,y-z-7,8,8,'#dc9271');c.strokeStyle='#fff0ce';c.lineWidth=2;c.beginPath();c.arc(x,y-z-7,5,-1,2);c.stroke();}});
     }
-    if(job?.type==='treat'&&job.phase==='approach')objects.push({y:this.player.y+1,draw:()=>{const x=this.player.x+21,y=this.player.y-36;rounded(c,x-8,y-4,16,8,4,'#cbaa69');for(const dx of [-8,8])for(const dy of [-3,3])ellipse(c,x+dx,y+dy,4,4,'#dec387');}});
     if(companion.emotion)objects.push({y:this.dog.y+2,draw:()=>{for(let i=0;i<3;i++){c.font='800 17px Nunito,sans-serif';c.fillStyle='#cc8975';c.textAlign='center';c.fillText('♥',this.dog.x-21+i*21,this.dog.y-62-(this.reduced?0:Math.sin(time*3+i)*7));}}});
     if(job?.type==='guide')label(c,'¡Sígueme, Anya!',this.dog.x,this.dog.y-78,{small:true,color:'#94713d'});
   }
@@ -180,6 +176,7 @@ export class Garden {
     label(c,'Casa de Alessandro',x,y+31,{small:true});
     if(distance(HOUSE,this.player)<330)label(c,g<5?'«¡Anya, confío en ti!»':'«¡El techo me hace cosquillas!»',x,y-290-lift,{small:true});c.restore();
   }
-  drawMinimap(c,state){const width=132,height=88,x=this.width-width-14,y=14;rounded(c,x,y,width,height,11,'#fffbeeeb');c.save();c.translate(x+8,y+7);c.scale((width-16)/2400,(height-14)/1600);for(let i=0;i<ZONES.length;i++){const zone=ZONES[i];ellipse(c,zone.x,zone.y,155,145,zone.color);ellipse(c,zone.x,zone.y,25,25,collectedCandles(state).includes(i)?'#5c8051':'#9b8248');}rounded(c,HOUSE.x-95,HOUSE.y-100,190,125,10,'#b77861');ellipse(c,PARTY.x,PARTY.y,38,38,'#c68b65');ellipse(c,this.player.x,this.player.y,46,46,'#c46f55');c.restore();}
+  minimapBox(){const width=this.width<420?108:132;return {width,height:Math.round(width*2/3),x:this.width-width-12,y:12};}
+  drawMinimap(c,state){const {width,height,x,y}=this.minimapBox();rounded(c,x,y,width,height,11,'#fffbeeeb');c.save();c.translate(x+8,y+7);c.scale((width-16)/2400,(height-14)/1600);for(let i=0;i<ZONES.length;i++){const zone=ZONES[i];ellipse(c,zone.x,zone.y,155,145,zone.color);ellipse(c,zone.x,zone.y,25,25,collectedCandles(state).includes(i)?'#5c8051':'#9b8248');}rounded(c,HOUSE.x-95,HOUSE.y-100,190,125,10,'#b77861');ellipse(c,PARTY.x,PARTY.y,38,38,'#c68b65');ellipse(c,this.player.x,this.player.y,46,46,'#c46f55');c.restore();}
   destroy(){this.destroyed=true;cancelAnimationFrame(this.frame);this.observer.disconnect();window.removeEventListener('keydown',this.keydown);window.removeEventListener('keyup',this.keyup);window.removeEventListener('blur',this.blur);this.canvas.removeEventListener('pointerup',this.pointer);}
 }

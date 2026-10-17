@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Companion,fetchSpot} from '../docs/companion.js';
-import {createGame,completeQuest,QUESTS,ZONES,SPAWN,scoreRun,cakeProfile,bakeCake,winGame,recordCompanion,readSave,collectTreasure} from '../docs/logic.js';
+import {createGame,completeQuest,QUESTS,ZONES,SPAWN,scoreRun,cakeProfile,bakeCake,winGame,readSave,collectTreasure} from '../docs/logic.js';
 import {findPath,isBlocked,distance,safePosition,KITCHEN} from '../docs/map.js';
 const active=()=>({...createGame(71),clockStarted:true});
 function minimum(){let s=active();for(const q of QUESTS.filter(q=>q.level===0||q.level===1&&ZONES[q.zone].ingredient<3))s=completeQuest(s,q.id);return s;}
@@ -24,12 +24,9 @@ test('la devolución sigue a Anya cuando cambia de sitio',()=>{
   for(let i=0;i<500&&dog.job?.phase!=='return';i++)dog.update(.04,owner);
   assert.equal(dog.job.phase,'return');owner.x-=140;const events=runDog(dog,owner);assert.deepEqual(events,['fetch']);assert.ok(distance(dog.position,owner)<66);
 });
-test('el premio y la caricia requieren que Pandora se acerque y complete su animación',()=>{
-  for(const type of ['treat','pet']){const owner={...SPAWN},dog=new Companion(safePosition({x:1300,y:1000}));dog.approach(type,owner);assert.equal(dog.job.phase,'approach');assert.deepEqual(runDog(dog,owner),[type]);assert.ok(distance(dog.position,owner)<70);assert.equal(dog.emotion.type,'heart');}
-});
 test('pausar no mueve la pelota ni a Pandora y cambiar de actividad cancela el juego anterior',()=>{
   const dog=new Companion({x:SPAWN.x-45,y:SPAWN.y+24});dog.fetch(SPAWN);dog.update(.04,SPAWN);const before=JSON.stringify({p:dog.position,b:dog.ball,j:dog.job});for(let i=0;i<30;i++)dog.update(0,SPAWN);assert.equal(JSON.stringify({p:dog.position,b:dog.ball,j:dog.job}),before);
-  dog.approach('treat',SPAWN);assert.equal(dog.ball,null);assert.deepEqual(runDog(dog,SPAWN),['treat']);
+  assert.ok(dog.lead(findPath(SPAWN,ZONES[0]),SPAWN));assert.equal(dog.ball,null);assert.equal(dog.job.type,'guide');
 });
 test('Pandora guía hasta las ocho estaciones y el horno sin cruzar obstáculos',()=>{
   for(const target of [...ZONES,KITCHEN]){const owner={...SPAWN},path=findPath(owner,target),dog=new Companion(safePosition({x:owner.x-48,y:owner.y+30}));assert.ok(dog.lead(path,owner));let steps=0;while(path.length&&steps++<2000){if(dog.canFollow)advanceOwner(owner,path);dog.update(.04,owner);assert.ok(!isBlocked(owner.x,owner.y));assert.ok(!isBlocked(dog.position.x,dog.position.y));}assert.equal(path.length,0,target.id+' quedó bloqueada');assert.ok(distance(owner,target)<12);dog.cancelGuide();assert.equal(dog.job,null);}
@@ -50,9 +47,9 @@ test('el puntaje distingue ingredientes y regalos y llega a cinco mil con todo y
   const minimumScore=scoreRun(winGame(bakeCake(minimum())));assert.equal(minimumScore.total,2250);assert.equal(minimumScore.ingredients,3);assert.equal(minimumScore.gifts,0);assert.equal(minimumScore.wishPoints,1000);
   const full=scoreRun(winGame(bakeCake(all())));assert.equal(full.total,5000);assert.equal(full.total,full.max);assert.equal(full.ingredients,8);assert.equal(full.gifts,8);assert.equal(full.total,full.candlePoints+full.ingredientPoints+full.giftPoints+full.wishPoints);
 });
-test('perder conserva los puntos recogidos; las interacciones y secretos no se pueden usar para inflar el puntaje',()=>{
-  let s=minimum();const before=scoreRun(s);for(let i=0;i<12;i++)for(const event of ['pet','fetch','treat'])s=recordCompanion(s,event);s=collectTreasure(s,'spark-0');assert.deepEqual(scoreRun(s),before);assert.equal(scoreRun({...all(),status:'lost'}).total,4000);
+test('perder conserva los puntos recogidos; los secretos no se pueden usar para inflar el puntaje',()=>{
+  let s=minimum();const before=scoreRun(s);s=collectTreasure(s,'spark-0');assert.deepEqual(scoreRun(s),before);assert.equal(scoreRun({...all(),status:'lost'}).total,4000);
 });
-test('los juegos con Pandora se guardan y los guardados anteriores de versión tres siguen funcionando',()=>{
-  let s=active();for(const event of ['fetch','treat','pet'])s=recordCompanion(s,event);const restored=readSave(JSON.stringify(s));assert.deepEqual(restored,s);assert.equal(s.dogPlays,1);assert.equal(s.dogTreats,1);const old={...s};delete old.dogPlays;delete old.dogTreats;const migrated=readSave(JSON.stringify(old));assert.equal(migrated.dogPlays,0);assert.equal(migrated.dogTreats,0);assert.equal(migrated.pets,1);assert.strictEqual(recordCompanion({...s,status:'won'},'fetch').status,'won');
+test('los guardados anteriores con contadores de Pandora siguen funcionando',()=>{
+  const s=active(),old={...s,pets:3,dogPlays:2,dogTreats:1},restored=readSave(JSON.stringify(old));assert.deepEqual(restored,s);assert.equal('pets' in restored,false);
 });

@@ -1,4 +1,6 @@
+
 /* A birthday story told in the same warm, illustrated garden. */
+
 .birthday-hero .alyssia{width:50%;height:72%;left:49%;bottom:11%;z-index:3}
 .birthday-hero .anya{left:8%;height:60%;bottom:11%}
 .birthday-hero .pandora{left:33%;bottom:8%;height:23%}
@@ -14,17 +16,8 @@
 .house-ground{position:absolute;bottom:0;width:240px;height:15px;border-radius:50%;background:#5f7c5330;left:-10px}
 .house-crack{font-size:50px;color:#977b5b;position:absolute;left:-9px;bottom:30px;opacity:0}
 .hero-house{position:absolute;left:31%;top:8%;transform:scale(.8);transform-origin:top left;z-index:1}
-.clock-chip{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#f4e5bc;border:1px solid #dfcc9e;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.clock-chip .symbol{width:17px;height:17px}
-.time-card{background:#f3e7c8;padding:15px;border:1px solid #e1d1a7;border-radius:12px}
-.time-card .sidebar-heading{margin-bottom:10px;font-size:10px}
-.time-card strong{font-size:20px;font-variant-numeric:tabular-nums;color:#7c663c}
-.clock-track{height:5px;background:#dfd2ae;border-radius:9px;overflow:hidden}
 .clock-fill{display:block;height:100%;border-radius:9px;background:#9aab78;transition:width .25s linear}
-.time-card>p{font-size:9px;color:#87734d;margin:8px 0 0}
-.time-urgent .clock-chip,.time-urgent .time-card{background:#f2dcd0;border-color:#dca58e}
 .time-urgent .clock-fill{background:#c2806a}
-.mission-card .text-button{display:block;margin-top:8px;text-align:left}
 .candle-tray{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
 .candle-slot{height:36px;border:1px dashed #cdd4bd;border-radius:5px;display:flex;align-items:center;justify-content:center;background:#eef0e1}
 .candle-slot .symbol{width:21px;height:26px;opacity:.27;filter:grayscale(1)}
@@ -43,7 +36,6 @@
 .house-watch .house-roof{top:calc(24px - var(--growth)*2px)}
 .house-watch.strained .house-crack{opacity:1}
 .house-watch.very-strained .house-roof{animation:roof-shake 1s ease-in-out infinite}
-.growth-alert{position:absolute;top:58px;left:15px;max-width:min(390px,calc(100% - 30px));padding:12px 16px;background:#fff3d6f5;color:#85643c;border:1px solid #d3b173;border-radius:9px;font-size:12px;font-weight:800;box-shadow:0 4px 15px #6f6d3025;pointer-events:none}
 [hidden]{display:none!important}
 .panel-clock{display:flex;align-items:center;gap:6px;padding-right:26px;margin:-9px 0 20px;color:#8d7951;font-size:10px;min-height:27px}
 .panel-clock .symbol{width:15px;height:15px}.panel-clock .live-time{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:#7b633e}.panel-clock>span:nth-of-type(2){margin-left:5px}
@@ -62,10 +54,11 @@
 .alyssia-checklist{display:flex;flex-wrap:wrap;gap:7px;margin:20px 0}.alyssia-checklist>span{display:flex;align-items:center;gap:5px;font-size:11px;padding:8px 10px;border:1px dashed #d8d8bf;border-radius:8px}.alyssia-checklist .symbol{width:23px;height:23px}.alyssia-checklist .checked{background:#e8eedb;border-style:solid;border-color:#b5c59d}
 .guide-tip{padding:14px 17px;background:#eee9d5;border-left:3px solid #bdab71;border-radius:0 7px 7px 0;font-size:12px!important;line-height:1.9}.guide-tip .symbol{width:18px;height:18px;margin-right:5px}
 .food-album{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:28px}.food-album>span{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;background:#efeddd;border:1px dashed #d6d6bd;opacity:.5;border-radius:9px}.food-album .symbol{height:38px;width:38px}.food-album b{font-size:11px}.food-album small{font-size:9px;color:#8d7b53}.food-album .found{opacity:1;background:#f3e8c8;border-style:solid;border-color:#dac68c}
-/* Three illustrated story beats before the clock starts. */
+
 .growing-house .house-walls img{animation:intro-grow 5s ease-in-out infinite alternate;transform-origin:bottom center}
 .growing-house .house-roof{animation:intro-roof 5s ease-in-out infinite alternate}
 /* Alyssia bakes; Anya chooses and blows out her eight candles. */
+
 .baking-scene{height:240px;position:relative;background:radial-gradient(ellipse at 65% 90%,#efdbad,transparent 65%)}
 .baking-scene>img{height:235px;position:absolute;left:40px;bottom:0;animation:mixing 1s ease-in-out infinite}
 .baking-bowl{position:absolute;right:18px;top:75px;display:flex;gap:8px}.baking-bowl .symbol{height:40px;width:40px;animation:ingredients-fall 1s ease-in-out infinite}.baking-bowl .symbol:nth-child(2){animation-delay:.2s}.baking-bowl .symbol:nth-child(3){animation-delay:.4s}
@@ -104,18 +97,12 @@
 @keyframes wall-right{to{transform:rotate(72deg)}}
 @keyframes roof-fly{to{transform:translate(45px,-145px) rotate(25deg);opacity:.6}}
 @keyframes last-stretch{from{height:185px}to{height:250px}}
-@media(min-width:1101px){.adventure-sidebar{gap:17px}.garden-stage{height:clamp(570px,73svh,760px);position:sticky;top:16px}.adventure-layout{grid-template-columns:minmax(0,1fr) 260px}.garden-caption{align-self:start}}
-@media(max-width:1100px) and (min-width:761px){.clock-chip{padding:8px;font-size:12px}.garden-toolbar h2{font-size:25px}.garden-tools{gap:6px}.tool-button{padding:8px}.time-card{padding:12px 10px}.time-card .sidebar-heading{font-size:9px}.time-card strong{font-size:17px}.candle-slot{height:31px}.candle-slot .symbol{width:18px}.mission-card h3{font-size:23px}}
-@media(max-width:760px){
- .garden-toolbar{flex-wrap:wrap;gap:11px}.garden-toolbar>div:first-child{flex:1}.garden-toolbar h2{font-size:25px}.garden-tools{width:100%;justify-content:flex-end}.clock-chip{margin-right:auto;padding:7px 11px;font-size:15px}.tool-button{font-size:11px;padding:8px 11px;min-height:38px}
- .adventure-sidebar{grid-template-columns:1fr 1fr;gap:18px 14px}.time-card{grid-column:1/-1;padding:13px 15px}.time-card .sidebar-heading{font-size:11px}.time-card strong{font-size:24px}.time-card>p{font-size:10px}.mission-card{display:block;grid-column:1/-1}.mission-card .eyebrow{font-size:8px}.mission-card h3{font-size:25px}.mission-card p{font-size:12px}.mission-card .text-button{display:inline-block;margin-right:15px;font-size:11px;max-width:none}
- .birthday-inventory{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:18px}.birthday-inventory>.sidebar-heading:first-child{grid-column:1/-1}.candle-tray{grid-column:1/-1;margin-bottom:4px}.candle-slot{height:40px}.candle-slot .symbol{height:29px;width:24px}.ingredient-heading{grid-column:1/-1}.required-ingredients{grid-column:1/-1}.food-slot{padding:11px}.food-slot b{font-size:12px}.food-slot small{font-size:10px}.extra-count{grid-column:1/-1;font-size:10px}.height-card{grid-column:1/-1}.height-card>p{font-size:11px}.house-watch{height:135px}.house-watch .storybook-house{transform:scale(.6);top:-8px}.height-card .sidebar-heading{font-size:12px}.treasure-card{display:block;grid-column:1/-1}.treasure-card .sidebar-heading{font-size:12px}.treasure-card p{font-size:11px}.treasure-card .text-button{font-size:11px}.autosave-note{font-size:10px}.garden-caption p{font-size:12px}.garden-caption .text-button{font-size:10px}
- .growth-alert{font-size:11px;top:53px}.panel-clock{font-size:9px;margin-top:0}.panel-clock .text-button{font-size:10px}.panel-clock .live-time{font-size:15px}#adventure-dialog .eyebrow{font-size:8px}#adventure-dialog h2{font-size:28px}#adventure-dialog>p{font-size:13px}
+@media(max-width:1100px) and (min-width:761px){.candle-slot{height:31px}.candle-slot .symbol{width:18px}}
+@media(max-width:760px){.candle-tray{grid-column:1/-1;margin-bottom:4px}.candle-slot{height:40px}.candle-slot .symbol{height:29px;width:24px}.ingredient-heading{grid-column:1/-1}.required-ingredients{grid-column:1/-1}.food-slot{padding:11px}.food-slot b{font-size:12px}.food-slot small{font-size:10px}.extra-count{grid-column:1/-1;font-size:10px}.house-watch{height:135px}.house-watch .storybook-house{transform:scale(.6);top:-8px}.panel-clock{font-size:9px;margin-top:0}.panel-clock .text-button{font-size:10px}.panel-clock .live-time{font-size:15px}#adventure-dialog .eyebrow{font-size:8px}#adventure-dialog h2{font-size:28px}#adventure-dialog>p{font-size:13px}
  .alyssia-greeting{gap:12px}.alyssia-greeting>img{width:90px;height:170px}.alyssia-greeting h2{font-size:25px!important}.alyssia-greeting p{font-size:12px}.alyssia-checklist{gap:5px}.alyssia-checklist>span{font-size:10px;padding:6px 8px}.guide-tip{font-size:11px!important;padding:12px}.station-level{padding:13px;gap:10px}.station-level>.symbol{width:30px;height:30px}.station-level b{font-size:13px}.station-level em{font-size:10px}.station-level small{font-size:7px}.zone-card-heading h3{font-size:21px}.zone-quests button{min-height:58px}.zone-quests button>div>b{font-size:12px}.zone-quests button small{font-size:10px}.station-food{font-size:10px}.map-alyssia{font-size:11px}.food-album{grid-template-columns:repeat(4,1fr);gap:5px}.food-album b{font-size:10px}.food-album small{font-size:8px}.food-album .symbol{width:32px;height:32px}.food-album>span{padding:12px 3px}
  .wish-scene{height:230px}.wish-scene .birthday-cake{transform:scale(.68);left:-7px}.wish-scene>img{height:210px;right:-7px}.wish-spark{font-size:38px}.wish-choice{font-size:12px;padding:13px;gap:9px}.wish-choice small{font-size:10px}.baking-scene>img{left:6px;height:220px}.baking-bowl{right:0;gap:4px}.baking-bowl .symbol{width:32px;height:32px}.oven-glow{right:10px;width:115px}
- .birthday-hero .alyssia{left:49%;height:72%}.hero-house{transform:scale(.65);left:31%;top:3%}.birthday-hero .speech-bubble{max-width:127px;font-size:10px}.birthday-hero .birthday-sticker{right:1%;top:0}.alyssia-label{font-size:9px;bottom:1%;right:-5px}.birthday-hero .anya-label{font-size:9px}.birthday-hero .pandora-label{font-size:9px;bottom:-6%;left:28%}.birthday-end-art{height:390px;order:-1}.family-line{height:280px;bottom:60px}.birthday-end-art .birthday-cake{transform:translateX(-50%) scale(.55)}.collapse-scene .storybook-house{transform:translateX(-50%) scale(1.25);bottom:50px}.celebration-eight{font-size:170px;top:0}.birthday-end{gap:20px}.birthday-end .end-copy h1{font-size:40px}.end-badge{font-size:9px}.end-garden-flower .symbol{width:45px;height:45px}
-}
-@media(max-width:360px){.garden-tools{gap:5px}.tool-button{font-size:10px;padding:8px 9px}.clock-chip{font-size:13px;padding:8px}.garden-toolbar h2{font-size:23px}.wish-scene .birthday-cake{transform:scale(.6)}.wish-scene>img{height:195px}.wish-choice{font-size:11px}.food-album{grid-template-columns:repeat(2,1fr)}.alyssia-greeting>img{width:77px}.alyssia-greeting h2{font-size:23px!important}.alyssia-greeting p{font-size:11px}.hero-house{transform:scale(.53);left:29%}.birthday-hero .speech-bubble{max-width:102px;top:0;font-size:9px}.alyssia-label{font-size:8px;padding:5px 8px}.birthday-hero .anya-label{font-size:8px;padding:5px 8px}.birthday-hero .pandora-label{font-size:8px;padding:5px 8px}}
+ .birthday-hero .alyssia{left:49%;height:72%}.hero-house{transform:scale(.65);left:31%;top:3%}.birthday-hero .speech-bubble{max-width:127px;font-size:10px}.birthday-hero .birthday-sticker{right:1%;top:0}.alyssia-label{font-size:9px;bottom:1%;right:-5px}.birthday-hero .anya-label{font-size:9px}.birthday-hero .pandora-label{font-size:9px;bottom:-6%;left:28%}.birthday-end-art{height:390px;order:-1}.family-line{height:280px;bottom:60px}.birthday-end-art .birthday-cake{transform:translateX(-50%) scale(.55)}.collapse-scene .storybook-house{transform:translateX(-50%) scale(1.25);bottom:50px}.celebration-eight{font-size:170px;top:0}.birthday-end{gap:20px}.birthday-end .end-copy h1{font-size:40px}.end-badge{font-size:9px}.end-garden-flower .symbol{width:45px;height:45px}}
+@media(max-width:360px){.wish-scene .birthday-cake{transform:scale(.6)}.wish-scene>img{height:195px}.wish-choice{font-size:11px}.food-album{grid-template-columns:repeat(2,1fr)}.alyssia-greeting>img{width:77px}.alyssia-greeting h2{font-size:23px!important}.alyssia-greeting p{font-size:11px}.hero-house{transform:scale(.53);left:29%}.birthday-hero .speech-bubble{max-width:102px;top:0;font-size:9px}.alyssia-label{font-size:8px;padding:5px 8px}.birthday-hero .anya-label{font-size:8px;padding:5px 8px}.birthday-hero .pandora-label{font-size:8px;padding:5px 8px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}.growing-house .house-walls img{height:170px}.broken-house .house-roof{transform:translate(45px,-145px) rotate(25deg)}.broken-house .house-walls:before{transform:rotate(-72deg)}.broken-house .house-walls:after{transform:rotate(72deg)}}
 
 .cake-berries{position:absolute;inset:10px 13px;display:flex;justify-content:space-between;pointer-events:none}.cake-berries .symbol{height:18px;width:18px}.cake-vanilla{font:25px Georgia,serif;color:#c8a353;position:absolute;left:44px;top:7px}

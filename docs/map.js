@@ -1,4 +1,4 @@
-import { WORLD_SIZE, SPAWN } from './logic.js?v=3.1';
+import { WORLD_SIZE, SPAWN } from './logic.js?v=3.4';
 
 export const PARTY = { x:1200, y:820 };
 export const KITCHEN = { id:'final', x:1330, y:890 };

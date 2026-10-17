@@ -1,4 +1,4 @@
-import { distance, findPath, isBlocked, safePosition, movePosition } from './map.js?v=3.1';
+import { distance, findPath, isBlocked, safePosition, movePosition } from './map.js?v=3.4';
 
 // Movement is independent of the canvas so pauses, fetch and guiding can be checked without a browser.
 export function fetchSpot(owner,facing=1) {
@@ -27,7 +27,6 @@ export class Companion {
     this.cancel();const to=fetchSpot(owner,facing);this.job={type:'fetch',phase:'throw',time:0};
     this.ball={from:{...owner},to,x:owner.x,y:owner.y,height:38,phase:'flying'};
   }
-  approach(type,owner){this.cancel();this.job={type,phase:'approach',goal:beside(owner),time:0};this.route=findPath(this.position,this.job.goal);}
   sniff(target){this.cancel();this.job={type:'sniff',target};this.route=findPath(this.position,target);}
   advance(dt,speed=260){
     if(!this.route.length)return;
@@ -55,15 +54,6 @@ export class Companion {
         if(distance(owner,job.goal)>90){job.goal=beside(owner);this.route=findPath(this.position,job.goal);}
         this.advance(dt,265);
         if(distance(this.position,owner)<66){this.cancel();this.emotion={type:'heart',time:2};event='fetch';}
-      }
-    } else if(job?.type==='treat'||job?.type==='pet') {
-      if(job.phase==='approach'){
-        if(distance(owner,job.goal)>90){job.goal=beside(owner);this.route=findPath(this.position,job.goal);}
-        this.advance(dt,265);
-        if(distance(this.position,owner)<70){job.phase='enjoy';job.time=0;this.emotion={type:'heart',time:2.2};}
-      } else {
-        job.time+=dt;
-        if(job.time>1.2){event=job.type;this.cancel();this.emotion={type:'heart',time:1.8};}
       }
     } else if(job?.type==='sniff') {
       if(distance(this.position,owner)>420)this.cancel();else this.advance(dt,240);
