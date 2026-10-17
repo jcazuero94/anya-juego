@@ -1,4 +1,4 @@
-import { distance, findPath, isBlocked, safePosition, movePosition } from './map.js?v=3.5';
+import { distance, findPath, isBlocked, safePosition, movePosition } from './map.js?v=4.1';
 
 // Movement is independent of the canvas so pauses, fetch and guiding can be checked without a browser.
 export function fetchSpot(owner,facing=1) {

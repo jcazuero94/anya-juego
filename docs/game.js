@@ -1,8 +1,8 @@
-import { GAME_DURATION, GROWTH_INTERVAL, INGREDIENTS, ZONES, QUESTS, TREASURES, LEVEL_NAMES, GROWTH_MESSAGES, PlayClock, createGame, generateChallenges, collectedCandles, collectedIngredients, collectedGifts, stationProgress, isUnlocked, completeQuest, makeMistake, collectTreasure, advanceTime, remainingTime, formatTime, canFinish, nextRequiredQuest, bakeCake, winGame, readSave, cakeProfile, scoreRun, SCORE_RULES } from './logic.js?v=3.5';
-import { Garden } from './world.js?v=3.5';
-import { Puzzle } from './puzzles.js?v=3.5';
-import { PARTY, KITCHEN } from './map.js?v=3.5';
-import { art, icon } from './icons.js?v=3.5';
+import { GAME_DURATION, GROWTH_INTERVAL, INGREDIENTS, ZONES, QUESTS, TREASURES, LEVEL_NAMES, GROWTH_MESSAGES, PlayClock, createGame, generateChallenges, collectedCandles, collectedIngredients, collectedGifts, stationProgress, isUnlocked, completeQuest, makeMistake, collectTreasure, advanceTime, remainingTime, formatTime, canFinish, nextRequiredQuest, bakeCake, winGame, readSave, cakeProfile, scoreRun, SCORE_RULES } from './logic.js?v=4.1';
+import { Garden } from './world.js?v=4.1';
+import { Puzzle } from './puzzles.js?v=4.1';
+import { PARTY, KITCHEN } from './map.js?v=4.1';
+import { art, icon } from './icons.js?v=4.1';
 import { MusicPlayer, readAudioPreferences } from './music.js?v=3.2';
 
 const $=(s,root=document)=>root.querySelector(s),$$=(s,root=document)=>[...root.querySelectorAll(s)];
@@ -59,7 +59,7 @@ function openPanel(html,setup,{kind='',wide=false,cls='',clock:showClock=true}={
 }
 function closePanel(){if(state?.status==='won'&&garden){showEnd(true);return;}bakingEndsAt=null;clearTimeout(sceneTimer);puzzle?.destroy();puzzle=null;panel.close();garden?.stop();save();$('#garden-canvas')?.focus({preventScroll:true});afterPanel();}
 // After any panel closes: resume after a scene, pop new prizes, then show what waited.
-function afterPanel(){if(panel.open)return;if(cutscene){cutscene=false;resumeClock();}celebrateFresh();showPending();}
+function afterPanel(){if(panel.open)return;if(cutscene){cutscene=false;resumeClock();garden?.setHouseGrowth(state.growth);}celebrateFresh();showPending();}
 panel.addEventListener('close',afterPanel);
 panel.addEventListener('cancel',e=>{if(state?.status==='won'&&garden){e.preventDefault();showEnd(true);return;}bakingEndsAt=null;if(panel.dataset.kind==='intro'){e.preventDefault();return;}clearTimeout(sceneTimer);puzzle?.destroy();puzzle=null;garden?.stop();save();});
 function houseScene(extra=''){return `<div class="storybook-house ${extra}" aria-hidden="true"><div class="house-roof"></div><div class="house-walls"><img src="assets/characters/alessandro.webp" alt=""><span class="house-crack">ϟ</span></div><div class="house-ground"></div></div>`;}
@@ -119,7 +119,7 @@ function curtain(title,subtitle){
 }
 function beginAdventure(){curtain('¡A explorar!','Pandora ya olfatea la primera pista');state={...state,clockStarted:true};closePanel();clock.start();syncMusic();save();message('¡Vamos, Anya! Alyssia espera en el centro. Empieza por la pradera para encontrar harina.');}
 function renderGarden(){
-  dispose();hudCounts=null;freshSlots=[];pendingGrowth=false;pendingStars=false;cutscene=false;document.body.classList.add('in-adventure');new Image().src='assets/animations/alessandro/casa.webp';preloadGrowth(state.growth+1);
+  dispose();hudCounts=null;freshSlots=[];pendingGrowth=false;pendingStars=false;cutscene=false;document.body.classList.add('in-adventure');new Image().src='assets/animations/alessandro/casa.webp';preloadGrowth(state.growth+1);if(state.treasures.length>=6&&state.treasures.length<8)preloadParty();
   main.innerHTML=`<section class="garden-game" aria-label="La aventura de las ocho velas"><div class="garden-stage"><canvas id="garden-canvas" tabindex="0" aria-label="Jardín explorable. Usa flechas, WASD o toca un lugar para caminar."></canvas>
   <div class="stage-top"><div class="hud-row"><button class="hud-button" id="menu-button" aria-haspopup="dialog">${icon('menu')}<span>Menú</span></button><span class="hud-chip clock-chip">${icon('clock')}<b class="live-time" role="timer"></b></span><button class="hud-button icon-only" id="pause-button" aria-label="Pausar" title="Pausar">${icon('pause')}</button></div>
   <button class="hud-row hud-progress" id="progress-button" aria-label="Ver mis velas, ingredientes y la casa de Alessandro"><span class="hud-chip" id="hud-candles">${icon('candle')}<b></b></span><span class="hud-chip" id="hud-food">${icon('flour')}<b></b></span><span class="hud-chip" id="hud-growth">${icon('home')}<b></b></span></button><p class="hud-next" id="hud-next"></p></div>
@@ -189,11 +189,11 @@ function growthHouse(g,{before='',after=pose(g,'b'),animate=false,extra=''}={}){
 }
 function resumeClock(){if(garden&&state?.status==='playing'&&state.clockStarted&&!manualPaused&&!document.hidden&&!$('#pause-dialog').open)clock.start();}
 // Short scenes stop the clock so watching them never costs playing time.
-function openCutscene(html,kind){
+function openCutscene(html,kind,play){
   clock.stop();if(state.status!=='playing')return;
   if(panel.open){if(kind==='stars')pendingStars=true;else pendingGrowth=true;return;}
   cutscene=true;
-  openPanel(html,()=>{$('#cutscene-ok').addEventListener('click',closePanel);sceneTimer=setTimeout(closePanel,kind==='growth'?7000:9000);},{kind,cls:`cutscene-dialog ${kind}-dialog`,clock:false});
+  openPanel(html,()=>{$('#cutscene-ok').addEventListener('click',closePanel);sceneTimer=setTimeout(closePanel,kind==='growth'?7000:12500);play?.(panel);},{kind,cls:`cutscene-dialog ${kind}-dialog`,clock:false});
 }
 // Scenes wait until the child is back in the garden (after a puzzle, the map or the menu).
 function showPending(){
@@ -206,7 +206,34 @@ function showGrowth(g){
   openCutscene(`<div class="cutscene-stage">${storyBackdrop(g>=7?'dusk':'')}${growthHouse(g,{before:pose(g,'a'),animate:true})}</div><span class="eyebrow">ESTIRÓN ${g} DE 10</span><h2 id="panel-title">¡Otro estirón!</h2><p>${GROWTH_MESSAGES[g]}</p><div class="growth-meter" aria-label="${g} de 10 estirones">${Array.from({length:10},(_,i)=>`<i class="${i<g-1?'filled':i===g-1?'filled new':''}"></i>`).join('')}</div><button class="button primary" id="cutscene-ok">¡A seguir explorando! <span aria-hidden="true">→</span></button>`,'growth');
 }
 function showStars(){
-  openCutscene(`<div class="cutscene-stage stars-stage">${storyBackdrop('festive')}<div class="star-orbit">${Array.from({length:8},(_,i)=>`<i style="--i:${i}">${icon('star')}</i>`).join('')}</div><div class="pandora-party"><img class="pandora-happy" src="assets/characters/pandora.webp" alt=""><span class="pandora-hearts">${Array.from({length:5},(_,i)=>`<i style="--i:${i}">♥</i>`).join('')}</span></div><span class="woof-bubble">¡Guau, guau!</span></div><span class="eyebrow">LOS SECRETOS DE PANDORA · 8 DE 8</span><h2 id="panel-title">¡Pandora encontró todas sus estrellas!</h2><p>Corre, salta y da vueltitas de felicidad con sus ocho estrellas. ¡Gracias por jugar con ella! Las verás en tu álbum.</p><button class="button primary" id="cutscene-ok">¡Bien hecho, Pandora! <span aria-hidden="true">♥</span></button>`,'stars');
+  openCutscene(`<div class="cutscene-stage stars-stage">${storyBackdrop('festive')}<div class="star-orbit">${Array.from({length:8},(_,i)=>`<i style="--i:${i}">${icon('star')}</i>`).join('')}</div><div class="pandora-party"><img class="pandora-happy" src="${PANDORA}invitacion-1.webp" alt=""><img class="party-ball" src="${PANDORA}pelota.webp" alt="" hidden><span class="pandora-hearts">${Array.from({length:5},(_,i)=>`<i style="--i:${i}">♥</i>`).join('')}</span></div><span class="woof-bubble">¡Guau, guau!</span></div><span class="eyebrow">LOS SECRETOS DE PANDORA · 8 DE 8</span><h2 id="panel-title">¡Pandora encontró todas sus estrellas!</h2><p>Te invita a jugar, corre entre sus estrellas, juega con su pelota y sonríe de felicidad. ¡Gracias por jugar con ella! Las verás en tu álbum.</p><button class="button primary" id="cutscene-ok">¡Bien hecho, Pandora! <span aria-hidden="true">♥</span></button>`,'stars',playParty);
+}
+// Pandora's party, frame by frame: an invitation, a run, the ball, then pure joy.
+const PANDORA='assets/animations/pandora/';
+const PARTY_FRAMES=['invitacion','carrera','pelota','alegria'].flatMap(group=>[1,2,3,4].map(n=>`${group}-${n}`));
+function preloadParty(){for(const name of [...PARTY_FRAMES,'pelota'])new Image().src=`${PANDORA}${name}.webp`;}
+function partyMoment(t){
+  if(t<2400)return {frame:`invitacion-${[1,2,3,2,3,4,1,4][Math.floor(t/300)]}`};
+  if(t<5600){const u=(t-2400)/3200;return {frame:`carrera-${1+Math.floor(t/110)%4}`,x:Math.sin(u*Math.PI*2),flip:Math.cos(u*Math.PI*2)<0};}
+  if(t<6100){const u=(t-5600)/500;return {frame:'invitacion-4',ball:{x:250-250*u,spin:-540*u}};}
+  if(t<7700)return {frame:`pelota-${1+Math.floor((t-6100)/400)}`};
+  if(t<8200){const u=(t-7700)/500;return {frame:'alegria-1',ball:{x:280*u,spin:540*u}};}
+  return {frame:`alegria-${[1,2,3,4,3,2][Math.min(5,Math.floor((t-8200)/430))]}`};
+}
+function playParty(root){
+  const img=$('.pandora-happy',root),party=$('.pandora-party',root),ball=$('.party-ball',root);
+  if(reducedMotion()){img.src=`${PANDORA}alegria-1.webp`;return;}
+  // Run as far as the stage allows on each side, measured in Pandora's own width.
+  const stage=$('.stars-stage',root),reach=Math.max(0,(stage.clientWidth-party.clientWidth)/2/party.clientWidth*90),start=performance.now();
+  const step=now=>{
+    if(!img.isConnected||!root.open)return;
+    const moment=partyMoment((now-start)%10800),src=`${PANDORA}${moment.frame}.webp`;
+    if(img.dataset.frame!==moment.frame){img.src=src;img.dataset.frame=moment.frame;}
+    party.style.translate=`calc(${(moment.x||0)*reach}% - 50%) 0`;img.style.scale=moment.flip?'-1 1':'1 1';
+    ball.hidden=!moment.ball;if(moment.ball){ball.style.translate=`${moment.ball.x}% 0`;ball.style.rotate=`${moment.ball.spin}deg`;}
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 function goAlyssia(){garden.travelTo({...PARTY,id:'talk',title:'Alyssia'});}
 function goNext(){const q=nextRequiredQuest(state);if(q)garden.guideTo({...q,title:ZONES[q.zone].name});else garden.guideTo({...KITCHEN,title:'el horno de Alyssia'});}
@@ -263,7 +290,7 @@ function openJournal(){
   const gifts=collectedGifts(state),ingredients=collectedIngredients(state);
   openPanel(`<span class="eyebrow">RECUERDOS DE UNA AVENTURA EN EQUIPO</span><h2 id="panel-title">El álbum de Anya</h2><div class="journal-stats"><span><b>${collectedCandles(state).length}</b> velas</span><span><b>${ingredients.length}</b> ingredientes</span><span><b>${gifts.length}</b> regalos</span></div><h3 class="journal-section-title">Los ocho ingredientes del pastel</h3><div class="food-album">${INGREDIENTS.map((item,i)=>`<span class="${ingredients.includes(i)?'found':''}">${icon(item.id)}<b>${item.name}</b><small>${item.required?'necesario':'extra'} ${ingredients.includes(i)?'✓':''}</small></span>`).join('')}</div><h3 class="journal-section-title">Los regalos de tus ocho años</h3><div class="discovery-grid gift-album">${ZONES.map((z,i)=>`<article class="discovery-card ${gifts.includes(i)?'discovered':''}">${icon('gift')}<h3>${gifts.includes(i)?z.gift:'Un regalo por descubrir'}</h3><p>${gifts.includes(i)?`Ganaste el nivel difícil en ${z.short}. ¡Un recuerdo de lo que aprendiste!`:`Te espera en el nivel 3 de ${z.name}.`}</p></article>`).join('')}</div><h3 class="journal-section-title">Los secretos de Pandora · ${state.treasures.length}/8</h3><div class="discovery-grid">${TREASURES.map(t=>`<article class="discovery-card ${state.treasures.includes(t.id)?'discovered':''}">${icon(state.treasures.includes(t.id)?'star':'paw')}<h3>${state.treasures.includes(t.id)?t.name:'Un secreto por descubrir'}</h3><p>${state.treasures.includes(t.id)?t.text:'Pídele a Pandora que olfatee y sigue sus huellas.'}</p></article>`).join('')}</div>`,null,{wide:true,kind:'journal'});
 }
-function findTreasure(t){state=collectTreasure(state,t.id);updateHud();save();sound('success');message(`¡Una estrella secreta! ${t.name}. ${t.text}${state.treasures.length===8?' ¡Encontraste las ocho! Pandora lleva una chispa de oro.':''}`);if(state.treasures.length===8){pendingStars=true;showPending();}}
+function findTreasure(t){state=collectTreasure(state,t.id);updateHud();save();sound('success');message(`¡Una estrella secreta! ${t.name}. ${t.text}${state.treasures.length===8?' ¡Encontraste las ocho! Pandora lleva una chispa de oro.':''}`);if(state.treasures.length>=6)preloadParty();if(state.treasures.length===8){pendingStars=true;showPending();}}
 function pause(){if(!garden||!state.clockStarted||state.status!=='playing'||$('#pause-dialog').open)return;clock.stop();if(state.status!=='playing')return;manualPaused=true;syncMusic();document.body.classList.add('game-paused');garden.stop();save();$('#pause-dialog').showModal();}
 function showEnd(won){
   dispose();document.body.classList.remove('in-adventure','time-urgent');if(won){wins++;try{localStorage.setItem('anya-adventure-wins',String(wins));}catch{}sound('win');}

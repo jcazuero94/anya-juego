@@ -1,7 +1,7 @@
-import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=3.5';
-import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=3.5';
+import { WORLD_SIZE, ZONES, QUESTS, TREASURES, collectedCandles, canFinish, stationProgress, rng } from './logic.js?v=4.1';
+import { PARTY, KITCHEN, HOUSE, TREES, POND, BEDS, distance, isBlocked, safePosition, findPath, movePosition } from './map.js?v=4.1';
 
-import { Companion } from './companion.js?v=3.5';
+import { Companion } from './companion.js?v=4.1';
 
 const TAU=Math.PI*2;
 function ellipse(ctx,x,y,rx,ry,fill) { ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=fill;ctx.fill(); }
@@ -15,7 +15,8 @@ export class Garden {
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.getState=getState;this.callbacks=callbacks;
     this.reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;this.player=safePosition(getState().position,getState().growth);this.companion=new Companion(safePosition({x:this.player.x-48,y:this.player.y+30}));this.dog=this.companion.position;
     this.camera={...this.player};this.path=[];this.keys=new Set();this.walk=0;this.facing=1;this.zoom=1;this.revealed=new Set();this.history=[];this.last=0;this.uiTime=0;this.saveTime=0;this.target=null;
-    this.images={};for(const name of ['anya','pandora','alessandro','alyssia']){const img=new Image();img.src=`assets/characters/${name}.webp`;this.images[name]=img;}
+    this.images={};for(const name of ['anya','pandora','alyssia']){const img=new Image();img.src=`assets/characters/${name}.webp`;this.images[name]=img;}
+    this.house=new Image();this.house.src='assets/animations/alessandro/casa.webp';this.poses={};this.houseGrowth=getState().growth;this.houseBump=-9;
     this.ground=this.paintGround();
     this.keydown=e=>{
       if(this.paused()||e.ctrlKey||e.metaKey||e.altKey)return;
@@ -33,6 +34,9 @@ export class Garden {
   }
   paused(){return this.destroyed||document.hidden||document.querySelector('dialog[open]')||this.getState()?.status!=='playing';}
   resize(){const box=this.canvas.getBoundingClientRect();this.width=box.width;this.height=box.height;const dpr=Math.min(2,window.devicePixelRatio||1);this.canvas.width=Math.round(box.width*dpr);this.canvas.height=Math.round(box.height*dpr);this.dpr=dpr;this.scale=(box.width<600?.82:.95)*this.zoom;}
+  // The garden house shows the pose of the last stretch the child has seen.
+  setHouseGrowth(growth){if(growth===this.houseGrowth)return;this.houseGrowth=growth;this.houseBump=performance.now()/1000;}
+  pose(growth){const key=growth?`${String(Math.min(10,growth)).padStart(2,'0')}b`:'01a';if(!this.poses[key]){const img=new Image();img.src=`assets/animations/alessandro/poses/${key}.webp`;this.poses[key]=img;}return this.poses[key];}
   setZoom(delta){this.zoom=Math.max(.65,Math.min(1.25,this.zoom+delta));this.resize();}
   setDirection(key,pressed){if(pressed){this.keys.add(key);this.path=[];this.target=null;this.companion.cancelGuide();}else this.keys.delete(key);}
   stop(){this.keys.clear();this.path=[];this.target=null;this.companion.cancelGuide();}
@@ -164,18 +168,18 @@ export class Garden {
     if(job?.type==='guide')label(c,'¡Sígueme, Anya!',this.dog.x,this.dog.y-78,{small:true,color:'#94713d'});
   }
   drawHouse(c,state,time){
-    const {x,y,w}=HOUSE,g=state.growth,lift=g*4,shake=g>=7&&!this.reduced?Math.sin(time*8)*1.5:0;
-    c.save();c.translate(shake,0);ellipse(c,x,y+8,155,28,'#536b4b25');
-    rounded(c,x-w/2,y-175-lift,w,184+lift,12,'#ebcf9d');rounded(c,x-w/2+20,y-151-lift,w-40,151+lift,8,'#ad9870');
-    c.save();c.beginPath();c.rect(x-w/2+22,y-150-lift,w-44,150+lift);c.clip();this.drawAvatar(c,'alessandro',{x,y:y-1},133+g*7,time);c.restore();
-    c.fillStyle='#c77d65';c.beginPath();c.moveTo(x-w/2-18,y-174-lift);c.lineTo(x,y-263-lift);c.lineTo(x+w/2+18,y-174-lift);c.closePath();c.fill();
-    c.strokeStyle='#9d6954';c.lineWidth=5;c.lineJoin='round';c.stroke();
-    rounded(c,x+w/2-42,y-238-lift,21,46,3,'#a97e60');
-    if(g>=5){c.strokeStyle='#9c785b';c.lineWidth=3;c.beginPath();c.moveTo(x-110,y-132);c.lineTo(x-97,y-108);c.lineTo(x-110,y-92);c.lineTo(x-100,y-70);c.stroke();}
-    if(g>=8){c.strokeStyle='#9c785b';c.lineWidth=3;c.beginPath();c.moveTo(x+110,y-146);c.lineTo(x+97,y-110);c.lineTo(x+111,y-80);c.lineTo(x+99,y-37);c.stroke();}
+    const {x,y}=HOUSE,g=this.houseGrowth,size=300,shake=g>=7&&!this.reduced?Math.sin(time*8)*1.5:0,since=performance.now()/1000-this.houseBump;
+    const bump=!this.reduced&&since>=0&&since<.9?Math.sin(since*Math.PI*3)*(1-since/.9):0,top=y+12-size*.9;
+    c.save();c.translate(x+shake,y+10);c.scale(1-bump*.05,1+bump*.08);c.translate(-x,-(y+10));ellipse(c,x,y+8,160,28,'#536b4b25');
+    if(this.house.complete&&this.house.naturalWidth){
+      c.drawImage(this.house,x-size/2,top,size,size);
+      const pose=this.pose(g),room={x:x-size/2+size*.19,y:top+size*.24,w:size*.62,h:size*.605};
+      if(pose.complete&&pose.naturalWidth){const s=Math.min(room.w,room.h)*(.84+Math.max(1,g)*.02);c.drawImage(pose,room.x+room.w/2-s/2,room.y+room.h-s,s,s);}
+    }
     label(c,'Casa de Alessandro',x,y+31,{small:true});
-    if(distance(HOUSE,this.player)<330)label(c,g<5?'«¡Anya, confío en ti!»':'«¡El techo me hace cosquillas!»',x,y-290-lift,{small:true});c.restore();
+    if(distance(HOUSE,this.player)<330)label(c,g<5?'«¡Anya, confío en ti!»':'«¡Ya casi no quepo!»',x,top-14,{small:true});c.restore();
   }
+
   minimapBox(){const width=this.width<420?108:132;return {width,height:Math.round(width*2/3),x:this.width-width-12,y:12};}
   drawMinimap(c,state){const {width,height,x,y}=this.minimapBox();rounded(c,x,y,width,height,11,'#fffbeeeb');c.save();c.translate(x+8,y+7);c.scale((width-16)/2400,(height-14)/1600);for(let i=0;i<ZONES.length;i++){const zone=ZONES[i];ellipse(c,zone.x,zone.y,155,145,zone.color);ellipse(c,zone.x,zone.y,25,25,collectedCandles(state).includes(i)?'#5c8051':'#9b8248');}rounded(c,HOUSE.x-95,HOUSE.y-100,190,125,10,'#b77861');ellipse(c,PARTY.x,PARTY.y,38,38,'#c68b65');ellipse(c,this.player.x,this.player.y,46,46,'#c46f55');c.restore();}
   destroy(){this.destroyed=true;cancelAnimationFrame(this.frame);this.observer.disconnect();window.removeEventListener('keydown',this.keydown);window.removeEventListener('keyup',this.keyup);window.removeEventListener('blur',this.blur);this.canvas.removeEventListener('pointerup',this.pointer);}
