@@ -71,3 +71,17 @@ Comprobado en navegador a 1280 × 900, 390 × 844 y 320 × 740: caricia completa
 La huella de guía y los cuatro botones de Pandora comparten ahora un grupo dentro del escenario. En computador aparecen junto al botón de explorar; en jardines más estrechos se colocan encima de las flechas y de explorar. Se retira la barra exterior.
 
 Revisión en navegador a 1280 × 900, 390 × 844 y 320 × 740: los cinco botones están íntegramente dentro del jardín, reciben sus clics y no se superponen entre sí ni con los controles para caminar y explorar. La huella conserva 44 × 44 px y las acciones, al menos 44 × 54 px. Comprobados lanzamiento, caricia, premio, estrella y guía al siguiente objetivo desde el nuevo grupo, sin submenús. Sin desplazamiento horizontal.
+
+## Las canciones de Pandora · versión 3.2
+
+55 pruebas automáticas correctas. Las nueve pruebas de audio verifican los tres archivos públicos, carga diferida, repetición completa de la lista, pausa con conservación de posición, silencio, cambio de canción, volumen, preferencias, recuperación del bloqueo de reproducción, promesas canceladas y límite de reintentos ante errores.
+
+Comprobaciones en el navegador real:
+
+- La portada no inicia ni descarga canciones. La introducción permanece en silencio; comenzar o continuar una partida inicia la música.
+- Los tres MP3 se decodifican y reproducen: `readyState=4`, `paused=false` y avance del tiempo de reproducción. El botón siguiente cambia entre «Pandora tiene hambre», «Sácame ya» y «Panties».
+- Pausar detiene el audio en su posición exacta. Al reanudar sigue desde allí. Volver al inicio y terminar una partida por tiempo detienen la música.
+- El altavoz de la cabecera y el del reproductor comparten el silencio. La preferencia se conserva al recargar. El volumen inicial es 30 %; cambiarlo a 29 % con el teclado se conserva al recargar, y el control no activa las flechas para caminar. Se restauró a 30 % tras la prueba.
+- Controles revisados a 1280 × 900, 390 × 844 y 320 × 740: sin desplazamiento horizontal y con botones musicales de 44 × 44 px accesibles. Sin errores de consola.
+
+Las copias web conservan las duraciones originales y solo contienen audio MP3 estéreo a 44,1 kHz y 128 kbit/s. Los archivos originales de `musica/` se conservan localmente, fuera de Git.

@@ -25,6 +25,12 @@ Pausar, ocultar la pestaña o salir detiene el reloj. Al volver a una pestaña o
 
 No hay anuncios, compras, cuentas, formularios ni rastreadores. El humor trata de un hechizo ficticio: crecer en la vida real está bien.
 
+## Las canciones de Pandora
+
+«Pandora tiene hambre», «Sácame ya» y «Panties» acompañan la partida en ese orden y vuelven a empezar al terminar la tercera. La música comienza al iniciar o continuar el juego, con volumen inicial del 30 %. El altavoz permite silenciar música y efectos; bajo el jardín están el cambio de canción y el volumen. El navegador recuerda estas preferencias.
+
+La música sigue durante los retos y los diálogos. Al pausar, ocultar la pestaña, salir o terminar la partida se detiene; al reanudar sigue desde el mismo punto. La portada y la introducción permanecen en silencio. Los archivos solo se cargan al jugar y se sirven desde GitHub Pages. Si una canción falla se intenta la siguiente; un fallo de audio no impide jugar.
+
 ## Puntaje de cada aventura
 
 La pantalla final muestra el puntaje y el desglose, tanto al ganar como al perder:
@@ -48,7 +54,7 @@ npm test
 
 Abrir `http://127.0.0.1:4173`. El servidor es únicamente de desarrollo. GitHub Pages sirve los archivos estáticos de `/docs`, sin backend.
 
-Las 46 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, interacción cercana, mejoras del pastel, puntos y compatibilidad de los guardados. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
+Las 55 pruebas cubren premios secuenciales, victoria mínima, materiales obligatorios, guía, límites exactos del reloj, pausas, derrota y victoria, variedad y dificultad, guardado y rutas, guía de Pandora, devolución de la pelota, interacción cercana, mejoras del pastel, puntos y compatibilidad de los guardados. También verifican la lista musical, reanudación, silencio, volumen, recuperación de bloqueos, errores y preferencias. El protocolo de navegador está en [tests/QA.md](tests/QA.md).
 
 Para revisar los límites temporales sin esperar veinte minutos:
 
@@ -63,6 +69,8 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 - `docs/game.js`: historia, interfaz, reloj, premios, Alyssia, pastel, deseo, mapa y álbum.
 - `docs/logic.js`: progresión, reloj de juego, retos reproducibles y guardado validado.
 - `docs/companion.js`: guía, pelota, premios, caricias y seguimiento de Pandora.
+- `docs/music.js`: lista de canciones, reproducción, volumen, pausas y preferencias de audio.
+- `docs/assets/music/`: las tres canciones familiares, preparadas para reproducción web.
 - `docs/world.js`, `docs/map.js`: Canvas, cámara, personajes, movimiento, colisiones y rutas.
 - `docs/puzzles.js`, `docs/questions.js`: minijuegos, pistas y bancos de lectura.
 - `docs/icons.js`: dibujos de velas, ingredientes y otros iconos.
@@ -73,3 +81,5 @@ Abrir `http://127.0.0.1:4173/__qa__`. El panel prepara partidas locales próxima
 GitHub Pages publica `main`, carpeta `/docs`. No hay compilación, dependencias de producción, claves ni llamadas a servicios externos durante el juego. Los datos se guardan en el navegador; si se bloquea el almacenamiento se puede jugar sin retomar después. La versión 3 inicia una misión nueva y conserva el contador de victorias anterior.
 
 Las fotos de referencia permanecen en `Fotos/`, excluida de Git. Solo se publican las cuatro ilustraciones creadas para este regalo. Los prompts están en [design/characters.md](design/characters.md). Nunito se distribuye con su [licencia SIL Open Font License](docs/assets/fonts/OFL.txt).
+
+Los originales de las canciones permanecen en `musica/`, excluida de Git. Las copias publicadas son MP3 estéreo de 128 kbit/s, sin carátulas ni metadatos extra y con sonoridad equilibrada entre canciones. Su duración se conserva: 2:27, 2:21 y 3:10, respectivamente.

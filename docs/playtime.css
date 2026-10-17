@@ -50,3 +50,11 @@
  .pandora-activity{bottom:210px}.travel-indicator{bottom:210px}
 }
 @media(max-width:360px){.stage-actions{left:10px;right:10px}.pandora-shortcuts button{font-size:9px}}
+
+/* The songs have their own volume and share the game's sound switch. */
+.garden-caption{display:grid;grid-template-columns:35px minmax(0,1fr)}
+.music-controls{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 100px;align-items:center;gap:8px;border-top:1px solid #dedfcd;padding-top:9px}
+.music-now{display:flex;align-items:center;gap:8px;min-width:0}.music-note{font-size:25px;color:#a78b4f}.music-now>span:last-child{min-width:0}.music-now b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:#65734f}.music-now small{display:block;font-size:9px;color:#8c805f;line-height:1.7}
+.music-button{display:grid;place-items:center;width:44px;height:44px;border:1px solid #d7d9c2;border-radius:9px;background:#f3eedb;color:#776c42;font-size:23px;line-height:1}.music-button:hover{background:#e9e1c5}.music-button .symbol{width:20px;height:20px}
+.music-volume{display:flex;flex-direction:column;gap:3px;font-size:9px;color:#7d795f}.music-volume input{width:100%;min-width:0;min-height:24px;margin:0;accent-color:#85935e;cursor:pointer}
+@media(max-width:760px){.music-controls{grid-template-columns:minmax(0,1fr) 44px 44px;gap:6px}.music-volume{grid-column:1/-1;flex-direction:row;align-items:center;gap:12px}.music-volume input{flex:1;min-height:30px}.music-now b{font-size:10px}.music-now small{font-size:8px}}
